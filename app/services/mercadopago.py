@@ -15,8 +15,9 @@ def criar_pagamento_pix(pedido_id: int, total: float):
         "transaction_amount": float(total),
         "description": f"Pedido #{pedido_id} - Lab85",
         "payment_method_id": "pix",
+        "external_reference": str(pedido_id),
         "payer": {
-            "email": "cliente@lab85.com"
+            "email": "cliente@lab85.com" 
         }
     }
     resposta = sdk.payment().create(payment_data)
