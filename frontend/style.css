@@ -2,107 +2,181 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Nunito', sans-serif; /* Fonte mais amigável e moderna */
+    user-select: none; /* Evita que o cliente selecione textos sem querer no tablet */
 }
 
 body {
-    background: #111;
-    color: #fff;
+    background-color: #0d0d0d; /* Fundo super escuro (estilo Lab/Industrial) */
+    color: #ffffff;
+    height: 100vh;
+    overflow: hidden; /* Trava a rolagem da página inteira */
 }
 
 .container {
     display: flex;
     height: 100vh;
+    width: 100vw;
 }
 
-/* PRODUTOS */
+/* --- ÁREA DO MENU (ESQUERDA) --- */
+.menu-area {
+    flex: 2.5;
+    display: flex;
+    flex-direction: column;
+    background-color: #141414;
+}
+
+.topo {
+    padding: 20px 40px;
+    background: #000000;
+    border-bottom: 2px solid #222;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.logo {
+    height: 60px; /* Ajuste conforme o formato da sua logo */
+    object-fit: contain;
+}
+
+.topo h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #FF5E00; /* Laranja vibrante - cor de fast food moderna */
+}
+
 .produtos {
-    flex: 3;
-    padding: 30px;
-}
-
-.produtos h1 {
-    font-size: 2.5rem;
-    margin-bottom: 20px;
+    flex: 1;
+    padding: 30px 40px;
+    overflow-y: auto; /* Apenas o menu rola, o carrinho fica fixo */
 }
 
 .grid-produtos {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 25px;
+    padding-bottom: 50px;
 }
 
+/* CARDS DE PRODUTOS */
 .card-produto {
-    background: #1f1f1f;
+    background: #222222;
     border-radius: 20px;
-    padding: 20px;
-    text-align: center;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+    transition: transform 0.1s ease;
+}
+
+.card-produto:active {
+    transform: scale(0.97); /* Efeito de aperto no card */
 }
 
 .card-produto h3 {
     font-size: 1.4rem;
-    margin-bottom: 10px;
+    font-weight: 700;
+    margin-top: 10px;
+    margin-bottom: 5px;
 }
 
 .card-produto p {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #FF5E00;
     margin-bottom: 15px;
 }
 
 .card-produto button {
-    background: #ff9800;
+    margin-top: auto;
+    background: #FF5E00;
+    color: #fff;
     border: none;
-    border-radius: 15px;
+    border-radius: 12px;
     padding: 15px;
-    font-size: 1.1rem;
-    width: 100%;
+    font-size: 1.2rem;
+    font-weight: 800;
     cursor: pointer;
+    text-transform: uppercase;
 }
 
-.card-produto button:active {
-    background: #e68900;
-}
-
-/* CARRINHO */
+/* --- ÁREA DO CARRINHO (DIREITA) --- */
 .carrinho {
-    flex: 1.2;
-    background: #000;
-    padding: 25px;
-    border-left: 3px solid #222;
+    flex: 1;
+    background: #1a1a1a;
+    border-left: 3px solid #FF5E00;
     display: flex;
     flex-direction: column;
 }
 
-.carrinho h2 {
-    font-size: 2rem;
-    margin-bottom: 20px;
+.carrinho-header {
+    padding: 30px;
+    background: #111;
+    border-bottom: 2px solid #222;
 }
 
-#itens-carrinho {
+.carrinho-header h2 {
+    font-size: 1.8rem;
+    font-weight: 800;
+}
+
+.lista-itens {
     flex: 1;
-    list-style: none;
+    padding: 20px;
     overflow-y: auto;
+    list-style: none;
 }
 
-#itens-carrinho li {
-    margin-bottom: 10px;
-    font-size: 1.1rem;
+/* ITEM DENTRO DO CARRINHO */
+.lista-itens li {
+    background: #2a2a2a;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
 }
 
-.total {
-    font-size: 1.6rem;
-    margin: 20px 0;
+.carrinho-footer {
+    background: #111;
+    padding: 30px;
+    border-top: 2px solid #222;
+}
+
+.total-area {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #aaa;
+}
+
+.valor-total {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #4CAF50; /* Verde para o dinheiro */
 }
 
 .btn-finalizar {
-    background: #4caf50;
+    width: 100%;
+    background: #4CAF50;
+    color: white;
     border: none;
-    border-radius: 20px;
-    padding: 20px;
-    font-size: 1.4rem;
+    border-radius: 16px;
+    padding: 25px;
+    font-size: 1.6rem;
+    font-weight: 800;
     cursor: pointer;
+    box-shadow: 0 6px 0 #2E7D32; /* Efeito 3D no botão */
+    transition: transform 0.1s, box-shadow 0.1s;
 }
 
 .btn-finalizar:active {
-    background: #43a047;
+    transform: translateY(6px);
+    box-shadow: 0 0 0 #2E7D32; /* O botão "afunda" ao ser tocado */
 }

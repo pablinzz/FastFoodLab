@@ -1,38 +1,44 @@
-// Aponta para a tua API no Render
 const API_URL = "https://fastfoodlab.onrender.com";
 
 let carrinho = [];
 let total = 0;
+let tempoInatividade;
 
-// CARREGAR PRODUTOS
+// --- SISTEMA DE INATIVIDADE (ABANDONO DE TOTEM) ---
+function resetarTotem() {
+    carrinho = [];
+    total = 0;
+    atualizarCarrinho();
+    window.scrollTo(0, 0); 
+}
+
+function reiniciarTemporizador() {
+    clearTimeout(tempoInatividade);
+    tempoInatividade = setTimeout(resetarTotem, 60000);
+}
+
+// Qualquer toque no ecrã reinicia o temporizador
+document.body.addEventListener('click', reiniciarTemporizador);
+document.body.addEventListener('touchstart', reiniciarTemporizador);
+reiniciarTemporizador();
+// --------------------------------------------------
+
 fetch(`${API_URL}/produtos`)
-    .then(res => res.json())
-    .then(produtos => {
-        const lista = document.getElementById("lista-produtos");
-
-        produtos.forEach(prod => {
-            const card = document.createElement("div");
-            card.className = "card-produto";
-
-            const imgHtml = prod.imagem_url ? `<img src="${prod.imagem_url}" alt="${prod.nome}" style="width:100%; height:150px; object-fit:cover; border-radius:8px; margin-bottom: 10px;">` : '';
-
-            card.innerHTML = `
-                ${imgHtml}
-                <h3>${prod.nome}</h3>
-                <p>R$ ${prod.preco.toFixed(2)}</p>
-                <button onclick="adicionarCarrinho(${prod.id}, '${prod.nome}', ${prod.preco})">
-                    Adicionar
-                </button>
-            `;
-
-            lista.appendChild(card);
-        });
-    });
 
 // ADICIONAR AO CARRINHO
 function adicionarCarrinho(id, nome, preco) {
-    carrinho.push({ id, nome, preco });
+    const itemUnicoId = Date.now() + Math.random(); 
+    carrinho.push({ id, nome, preco, uniqueId: itemUnicoId });
     total += preco;
+    atualizarCarrinho();
+}
+
+// NOVO: REMOVER DO CARRINHO
+function removerDoCarrinho(uniqueId, preco) {
+    carrinho = carrinho.filter(item => item.uniqueId !== uniqueId);
+    total -= preco;
+    // Evitar bugs de arredondamento
+    if (total < 0) total = 0; 
     atualizarCarrinho();
 }
 
@@ -43,7 +49,15 @@ function atualizarCarrinho() {
 
     carrinho.forEach(item => {
         const li = document.createElement("li");
-        li.textContent = `${item.nome} - R$ ${item.preco.toFixed(2)}`;
+        li.style.display = "flex";
+        li.style.justifyContent = "space-between";
+        li.style.marginBottom = "15px";
+        li.style.alignItems = "center";
+        
+        li.innerHTML = `
+            <span>${item.nome} - R$ ${item.preco.toFixed(2)}</span>
+            <button onclick="removerDoCarrinho(${item.uniqueId}, ${item.preco})" style="background: #e53935; color: white; border: none; padding: 5px 10px; border-radius: 50%; font-weight: bold; cursor: pointer;">X</button>
+        `;
         lista.appendChild(li);
     });
 

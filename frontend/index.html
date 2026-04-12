@@ -2,39 +2,45 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Totem de Pedidos</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <title>Lab85 - Autoatendimento</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 
 <div class="container">
+    <main class="menu-area">
+        <header class="topo">
+            <img src="./Logo Lab85.png" alt="Lab85 Logo" class="logo">
+            <h1>Faça seu pedido</h1>
+        </header>
 
-    <!-- PRODUTOS -->
-    <section class="produtos">
-        <h1>🍔 Faça seu pedido</h1>
+        <section class="produtos">
+            <div id="lista-produtos" class="grid-produtos">
+                </div>
+        </section>
+    </main>
 
-        <div id="lista-produtos" class="grid-produtos">
-            <!-- Produtos via JS -->
-        </div>
-    </section>
-
-    <!-- CARRINHO -->
     <aside class="carrinho">
-        <h2>🛒 Seu Pedido</h2>
-
-        <ul id="itens-carrinho"></ul>
-
-        <div class="total">
-            Total: R$ <span id="total">0.00</span>
+        <div class="carrinho-header">
+            <h2>🛒 Seu Pedido</h2>
         </div>
 
-        <button class="btn-finalizar" onclick="finalizarPedido()">
-            Finalizar Pedido
-        </button>
-    </aside>
+        <ul id="itens-carrinho" class="lista-itens">
+            </ul>
 
+        <div class="carrinho-footer">
+            <div class="total-area">
+                <span>Total</span>
+                <span class="valor-total">R$ <span id="total">0.00</span></span>
+            </div>
+            <button class="btn-finalizar" onclick="finalizarPedido()">
+                FINALIZAR E PAGAR
+            </button>
+        </div>
+    </aside>
+    
 </div>
 
 <script src="./app.js"></script>
