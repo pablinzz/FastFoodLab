@@ -1,80 +1,53 @@
-from fastapi import APIRouter, Request, Depends, HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
+from typing import List
 
 from app.database import get_db
-from app.models import Pedido, ItemPedido, Produto
+from app.models import Pedido, ItemPedido
+from app.services.mercadopago import criar_preferencia
 
-router = APIRouter(
-    prefix="/pedido",
-    tags=["Pedidos"]
-)
+router = APIRouter(prefix="/pedido", tags=["Pedidos"])
 
+# Dicionário do que a Vercel vai nos enviar:
+class ItemCarrinho(BaseModel):
+    id: int
+    nome: str
+    preco: float
+
+class PedidoRequest(BaseModel):
+    itens: List[ItemCarrinho]
 
 @router.post("/finalizar")
-def finalizar_pedido(
-    request: Request,
-    db: Session = Depends(get_db)
-):
-    carrinho = request.session.get("carrinho")
-
-    if not carrinho:
+def finalizar_pedido(req: PedidoRequest, db: Session = Depends(get_db)):
+    if not req.itens:
         raise HTTPException(status_code=400, detail="Carrinho vazio")
 
-    total = 0
+    # Calcula o total
+    total = sum(item.preco for item in req.itens)
 
-    # -----------------------
-    # Criar pedido
-    # -----------------------
-    pedido = Pedido(
-        total=0,
-        status="AGUARDANDO_PAGAMENTO"
-    )
-
+    # Cria o Pedido
+    pedido = Pedido(total=total, status="AGUARDANDO_PAGAMENTO")
     db.add(pedido)
     db.commit()
     db.refresh(pedido)
 
-    # -----------------------
-    # Criar itens do pedido
-    # -----------------------
-    for produto_id, item in carrinho.items():
-        produto = db.query(Produto).filter(
-            Produto.id == int(produto_id)
-        ).first()
-
-        if not produto:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Produto {produto_id} não encontrado"
-            )
-
-        subtotal = produto.preco * item["quantidade"]
-        total += subtotal
-
+    # Adiciona os Itens
+    for item in req.itens:
         item_pedido = ItemPedido(
             pedido_id=pedido.id,
-            produto_id=produto.id,
-            quantidade=item["quantidade"],
-            preco_unitario=produto.preco
+            produto_id=item.id,
+            quantidade=1, 
+            preco_unitario=item.preco
         )
-
         db.add(item_pedido)
-
-    # Atualizar total real
-    pedido.total = total
 
     db.commit()
 
-    # -----------------------
-    # Limpar carrinho
-    # -----------------------
-    request.session["carrinho"] = {}
-
-    # -----------------------
-    # Ir para pagamento
-    # -----------------------
-    return RedirectResponse(
-        url=f"/pagamento/{pedido.id}",
-        status_code=303
-    )
+    # Gera link de Checkout e devolve pro Frontend
+    try:
+        pref = criar_preferencia(pedido.id, float(pedido.total))
+        checkout_url = pref.get("sandbox_init_point") or pref.get("init_point")
+        return {"pedido_id": pedido.id, "checkout_url": checkout_url}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Erro no Mercado Pago")

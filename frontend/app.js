@@ -61,9 +61,10 @@ function finalizarPedido() {
     })
     .then(res => res.json())
     .then(data => {
-        alert("Pedido enviado!");
-        carrinho = [];
-        total = 0;
-        atualizarCarrinho();
+        if (data.checkout_url) {
+            window.location.href = data.checkout_url; 
+        } else {
+            alert("Erro ao gerar pagamento.");
+        }
     });
 }
