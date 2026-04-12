@@ -15,6 +15,7 @@ class Produto(Base):
     preco = Column(Float, nullable=False)
     categoria = Column(String(50), nullable=False)
     ativo = Column(Boolean, default=True)
+    imagem_url = Column(String, nullable=True)
 
     itens_pedido = relationship("ItemPedido", back_populates="produto")
 
