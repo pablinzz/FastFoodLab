@@ -28,13 +28,15 @@ fetch(`${API_URL}/produtos`)
     .then(res => res.json())
     .then(produtos => {
         const lista = document.getElementById("lista-produtos");
-        lista.innerHTML = ""; // Limpa a lista para não duplicar
+        lista.innerHTML = ""; // Limpa a lista antes de desenhar
 
         produtos.forEach(prod => {
             const card = document.createElement("div");
             card.className = "card-produto";
 
-            const imgHtml = prod.imagem_url ? `<img src="${prod.imagem_url}" alt="${prod.nome}" style="width:100%; height:150px; object-fit:cover; border-radius:8px; margin-bottom: 10px;">` : '';
+            const imgHtml = prod.imagem_url 
+                ? `<img src="${prod.imagem_url}" alt="${prod.nome}" style="width:100%; height:150px; object-fit:cover; border-radius:8px; margin-bottom: 10px;">` 
+                : '';
 
             card.innerHTML = `
                 ${imgHtml}
@@ -48,7 +50,7 @@ fetch(`${API_URL}/produtos`)
             lista.appendChild(card);
         });
     })
-    .catch(err => console.error("Erro ao carregar os produtos:", err));
+    .catch(err => console.error("Erro ao carregar os produtos do Supabase:", err));
 
 // ADICIONAR AO CARRINHO
 function adicionarCarrinho(id, nome, preco) {
