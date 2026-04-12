@@ -23,7 +23,7 @@ async def webhook_mp(request: Request, db: Session = Depends(get_db)):
             pedido_id = int(payment["external_reference"])
 
             pedido = db.query(Pedido).filter(Pedido.id == pedido_id).first()
-            pedido.status = "pago"
+            pedido.status = "PAGO"
             db.commit()
 
     return {"status": "ok"}

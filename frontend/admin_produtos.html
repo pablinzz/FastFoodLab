@@ -86,7 +86,8 @@ async function salvarProduto() {
     const preco = document.getElementById("preco").value;
     const categoria = document.getElementById("categoria").value;
 
-    const response = await fetch("/produtos", {
+    const response = await fetch("https://fastfoodlab.onrender.com/produtos", {
+        method: "POST",
         method: "POST",
         headers: {
             "Content-Type": "application/json"
