@@ -14,7 +14,10 @@ fetch(`${API_URL}/produtos`)
             const card = document.createElement("div");
             card.className = "card-produto";
 
+            const imgHtml = prod.imagem_url ? `<img src="${prod.imagem_url}" alt="${prod.nome}" style="width:100%; height:150px; object-fit:cover; border-radius:8px; margin-bottom: 10px;">` : '';
+
             card.innerHTML = `
+                ${imgHtml}
                 <h3>${prod.nome}</h3>
                 <p>R$ ${prod.preco.toFixed(2)}</p>
                 <button onclick="adicionarCarrinho(${prod.id}, '${prod.nome}', ${prod.preco})">
