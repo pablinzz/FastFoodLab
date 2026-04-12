@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Carrinho</title>
+</head>
+<body>
+    <h1>Carrinho</h1>
+
+    {% if carrinho %}
+        <ul>
+            {% for id, item in carrinho.items() %}
+                <li>
+                    {{ item.nome }} —
+                    {{ item.quantidade }}x —
+                    R$ {{ "%.2f"|format(item.preco * item.quantidade) }}
+
+                    <form method="post" action="/carrinho/remover/{{ id }}">
+                        <button>Remover</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <h2>Total: R$ {{ "%.2f"|format(total) }}</h2>
+
+        <form method="post" action="/pedido/finalizar">
+            <button>Finalizar Pedido</button>
+        </form>
+    {% else %}
+        <p>Carrinho vazio</p>
+    {% endif %}
+
+    <br><br>
+    <a href="/produtos">⬅ Voltar ao menu</a>
+</body>
+</html>

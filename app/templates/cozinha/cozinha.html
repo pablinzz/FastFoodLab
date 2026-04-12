@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cozinha</title>
+  <script>
+    async function carregarPedidos() {
+      const res = await fetch("/cozinha/pedidos");
+      const pedidos = await res.json();
+
+      const div = document.getElementById("pedidos");
+      div.innerHTML = "";
+
+      pedidos.forEach(p => {
+        let html = `<h3>Pedido #${p.id}</h3><ul>`;
+        p.itens.forEach(i => {
+          html += `<li>${i.quantidade}x ${i.produto.nome}</li>`;
+        });
+        html += `</ul>
+          <button onclick="atualizar(${p.id}, 'EM_PREPARO')">Em preparo</button>
+          <button onclick="atualizar(${p.id}, 'PRONTO')">Pronto</button>
+          <hr>`;
+        div.innerHTML += html;
+      });
+    }
+
+    async function atualizar(id, status) {
+      await fetch(`/cozinha/pedido/${id}/status?status=${status}`, {
+        method: "PUT"
+      });
+      carregarPedidos();
+    }
+
+    setInterval(carregarPedidos, 3000);
+    window.onload = carregarPedidos;
+  </script>
+</head>
+<body>
+  <h1>Cozinha</h1>
+  <div id="pedidos"></div>
+</body>
+</html>

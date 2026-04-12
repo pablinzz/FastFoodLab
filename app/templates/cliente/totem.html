@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Totem de Pedidos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="container">
+
+    <!-- PRODUTOS -->
+    <section class="produtos">
+        <h1>🍔 Faça seu pedido</h1>
+
+        <div id="lista-produtos" class="grid-produtos">
+            <!-- Produtos via JS -->
+        </div>
+    </section>
+
+    <!-- CARRINHO -->
+    <aside class="carrinho">
+        <h2>🛒 Seu Pedido</h2>
+
+        <ul id="itens-carrinho"></ul>
+
+        <div class="total">
+            Total: R$ <span id="total">0.00</span>
+        </div>
+
+        <button class="btn-finalizar" onclick="finalizarPedido()">
+            Finalizar Pedido
+        </button>
+    </aside>
+
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
