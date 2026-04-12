@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN")
-BASE_URL = os.getenv("BASE_URL", "http://localhost:8000") # Puxa do .env, se não achar usa localhost
+BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
 
 if not MP_ACCESS_TOKEN:
     raise RuntimeError("MP_ACCESS_TOKEN não encontrado no ambiente")
