@@ -1,36 +1,46 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Cozinha</title>
+  <title>Lab85 - Cozinha</title>
+  <style>
+      body { background: #0d0d0d; color: white; font-family: 'Nunito', sans-serif; padding: 20px; }
+      h1 { color: #FF5E00; border-bottom: 2px solid #222; padding-bottom: 10px; margin-bottom: 20px; }
+      .grid-pedidos { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+      .pedido-card { background: #222; border-left: 5px solid #FF5E00; padding: 20px; border-radius: 10px; }
+      .pedido-card h3 { font-size: 1.8rem; margin-bottom: 15px; }
+      .pedido-card ul { list-style: none; padding: 0; font-size: 1.3rem; margin-bottom: 20px; }
+      .pedido-card li { margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+      .btn-pronto { width: 100%; background: #4CAF50; color: white; border: none; padding: 15px; border-radius: 8px; font-size: 1.2rem; font-weight: bold; cursor: pointer; }
+  </style>
   <script>
-    // Aponta para a tua API no Render
     const API_URL = "https://fastfoodlab.onrender.com";
+    let quantidadeAntiga = 0;
 
     async function carregarPedidos() {
       const res = await fetch(`${API_URL}/cozinha/pedidos`);
       const pedidos = await res.json();
 
-      const div = document.getElementById("pedidos");
+      // Aviso sonoro se cair pedido novo
+      if(pedidos.length > quantidadeAntiga && quantidadeAntiga !== 0) {
+          // Você pode colocar um arquivo de audio curto na pasta frontend
+          // new Audio('./campainha.mp3').play(); 
+      }
+      quantidadeAntiga = pedidos.length;
+
+      const div = document.getElementById("grid");
       div.innerHTML = "";
 
       pedidos.forEach(p => {
-        let html = `<h3>Pedido #${p.id}</h3><ul>`;
-        p.itens.forEach(i => {
-          html += `<li>${i.quantidade}x ${i.produto.nome}</li>`;
-        });
-        html += `</ul>
-          <button onclick="atualizar(${p.id}, 'EM_PREPARO')">Em preparo</button>
-          <button onclick="atualizar(${p.id}, 'PRONTO')">Pronto</button>
-          <hr>`;
+        let html = `<div class="pedido-card"><h3>Pedido #${p.id}</h3><ul>`;
+        p.itens.forEach(i => { html += `<li><strong>${i.quantidade}x</strong> ${i.produto.nome}</li>`; });
+        html += `</ul><button class="btn-pronto" onclick="atualizar(${p.id}, 'PRONTO')">MARCAR COMO PRONTO</button></div>`;
         div.innerHTML += html;
       });
     }
 
     async function atualizar(id, status) {
-      await fetch(`${API_URL}/cozinha/pedido/${id}/status?status=${status}`, {
-        method: "PUT"
-      });
+      await fetch(`${API_URL}/cozinha/pedido/${id}/status?status=${status}`, { method: "PUT" });
       carregarPedidos();
     }
 
@@ -39,7 +49,7 @@
   </script>
 </head>
 <body>
-  <h1>Cozinha</h1>
-  <div id="pedidos"></div>
+  <h1>👨‍🍳 Tela da Cozinha (Pedidos Pagos)</h1>
+  <div id="grid" class="grid-pedidos"></div>
 </body>
 </html>

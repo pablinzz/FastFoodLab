@@ -64,12 +64,13 @@ function atualizarCarrinho() {
     document.getElementById("total").textContent = total.toFixed(2);
 }
 
-// FINALIZAR PEDIDO
+let pedidoAtualId = null;
+let intervaloPix = null;
+
 function finalizarPedido() {
-    if (carrinho.length === 0) {
-        alert("Adicione itens ao carrinho!");
-        return;
-    }
+    if (carrinho.length === 0) return;
+
+    document.querySelector('.btn-finalizar').innerText = "GERANDO PIX...";
 
     fetch(`${API_URL}/pedido/finalizar`, {
         method: "POST",
@@ -78,10 +79,40 @@ function finalizarPedido() {
     })
     .then(res => res.json())
     .then(data => {
-        if (data.checkout_url) {
-            window.location.href = data.checkout_url; 
+        document.querySelector('.btn-finalizar').innerText = "FINALIZAR E PAGAR";
+        
+        if (data.qr_code_base64) {
+            // Mostra o QR Code na tela
+            document.getElementById("qr-code-img").src = "data:image/jpeg;base64," + data.qr_code_base64;
+            document.getElementById("modal-pix").style.display = "flex";
+            
+            pedidoAtualId = data.pedido_id;
+            
+            // Fica checando de 3 em 3 segundos se o Webhook do MP avisou que o Pix caiu
+            intervaloPix = setInterval(checarStatusPix, 3000);
         } else {
-            alert("Erro ao gerar pagamento.");
+            alert("Erro ao gerar PIX.");
         }
     });
+}
+
+function checarStatusPix() {
+    fetch(`${API_URL}/pedido/${pedidoAtualId}/status`)
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "PAGO") {
+            clearInterval(intervaloPix);
+            document.getElementById("modal-pix").style.display = "none";
+            
+            // Tela de Sucesso
+            alert("🎉 Pagamento Aprovado! Seu pedido já está na tela da cozinha.");
+            resetarTotem();
+        }
+    });
+}
+
+function cancelarPix() {
+    clearInterval(intervaloPix);
+    document.getElementById("modal-pix").style.display = "none";
+}
 }
