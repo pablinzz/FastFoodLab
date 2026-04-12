@@ -142,4 +142,3 @@ function cancelarPix() {
     clearInterval(intervaloPix);
     document.getElementById("modal-pix").style.display = "none";
 }
-}
