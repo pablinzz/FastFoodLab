@@ -12,13 +12,12 @@ class ProdutoCreate(BaseModel):
     categoria: str | None = None
     imagem_url: str | None = None
 
-@router.get("/")
+@router.get("")
 def listar_produtos(db: Session = Depends(get_db)):
     produtos = db.query(Produto).filter(Produto.ativo == True).all()
-    # Retorna uma lista limpa em formato JSON para a Vercel ler
     return [{"id": p.id, "nome": p.nome, "preco": p.preco, "categoria": p.categoria, "imagem_url": p.imagem_url} for p in produtos]
 
-@router.post("/")
+@router.post("")
 def criar_produto(produto: ProdutoCreate, db: Session = Depends(get_db)):
     novo_produto = Produto(nome=produto.nome, preco=produto.preco, categoria=produto.categoria, imagem_url=produto.imagem_url)
     db.add(novo_produto)
