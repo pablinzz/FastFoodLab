@@ -1,8 +1,11 @@
+// Aponta para a tua API no Render
+const API_URL = "https://fastfoodlab.onrender.com";
+
 let carrinho = [];
 let total = 0;
 
 // CARREGAR PRODUTOS
-fetch("/produtos")
+fetch(`${API_URL}/produtos`)
     .then(res => res.json())
     .then(produtos => {
         const lista = document.getElementById("lista-produtos");
@@ -51,7 +54,7 @@ function finalizarPedido() {
         return;
     }
 
-    fetch("/pedido/finalizar", {
+    fetch(`${API_URL}/pedido/finalizar`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ itens: carrinho })

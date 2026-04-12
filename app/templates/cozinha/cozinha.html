@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>Cozinha</title>
   <script>
+    // Aponta para a tua API no Render
+    const API_URL = "https://fastfoodlab.onrender.com";
+
     async function carregarPedidos() {
-      const res = await fetch("/cozinha/pedidos");
+      const res = await fetch(`${API_URL}/cozinha/pedidos`);
       const pedidos = await res.json();
 
       const div = document.getElementById("pedidos");
@@ -24,7 +28,7 @@
     }
 
     async function atualizar(id, status) {
-      await fetch(`/cozinha/pedido/${id}/status?status=${status}`, {
+      await fetch(`${API_URL}/cozinha/pedido/${id}/status?status=${status}`, {
         method: "PUT"
       });
       carregarPedidos();
