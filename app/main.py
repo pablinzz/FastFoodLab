@@ -7,7 +7,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine
 from app.models import Base
 
-# Note que removemos carrinho, pagamento e totem daqui
 from app.routers import webhook, pedidos, cozinha, produtos, admin
 
 app = FastAPI(

@@ -23,7 +23,32 @@ document.body.addEventListener('touchstart', reiniciarTemporizador);
 reiniciarTemporizador();
 // --------------------------------------------------
 
+// CARREGAR PRODUTOS
 fetch(`${API_URL}/produtos`)
+    .then(res => res.json())
+    .then(produtos => {
+        const lista = document.getElementById("lista-produtos");
+        lista.innerHTML = ""; // Limpa a lista para não duplicar
+
+        produtos.forEach(prod => {
+            const card = document.createElement("div");
+            card.className = "card-produto";
+
+            const imgHtml = prod.imagem_url ? `<img src="${prod.imagem_url}" alt="${prod.nome}" style="width:100%; height:150px; object-fit:cover; border-radius:8px; margin-bottom: 10px;">` : '';
+
+            card.innerHTML = `
+                ${imgHtml}
+                <h3>${prod.nome}</h3>
+                <p>R$ ${prod.preco.toFixed(2)}</p>
+                <button onclick="adicionarCarrinho(${prod.id}, '${prod.nome}', ${prod.preco})">
+                    Adicionar
+                </button>
+            `;
+
+            lista.appendChild(card);
+        });
+    })
+    .catch(err => console.error("Erro ao carregar os produtos:", err));
 
 // ADICIONAR AO CARRINHO
 function adicionarCarrinho(id, nome, preco) {
