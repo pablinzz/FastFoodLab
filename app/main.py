@@ -6,10 +6,12 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import engine
 from app.models import Base
-from app.routers import carrinho, pagamento, webhook, pedidos, cozinha, totem, produtos, admin
+
+# Note que removemos carrinho, pagamento e totem daqui
+from app.routers import webhook, pedidos, cozinha, produtos, admin
 
 app = FastAPI(
-    title="Sistema de Pedidos - Fast Food",
+    title="API Lab85",
     version="1.0.0"
 )
 
@@ -27,12 +29,11 @@ Base.metadata.create_all(bind=engine)
 
 @app.get("/")
 def home():
-    return {"status": "API FastFood rodando, pronta para a Vercel!"}
+    return {"status": "API Lab85 rodando perfeitamente!"}
 
-# --- Rotas da Aplicação ---
+# --- Rotas Ativas da Aplicação ---
 app.include_router(produtos.router)
 app.include_router(pedidos.router)
-app.include_router(pagamento.router)
 app.include_router(webhook.router)
 app.include_router(cozinha.router)
 app.include_router(admin.router)
