@@ -13,6 +13,7 @@ class ItemCarrinho(BaseModel):
     id: int
     nome: str
     preco: float
+    observacoes: str | None = ""
     uniqueId: float
 
 class PedidoRequest(BaseModel):

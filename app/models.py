@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import JSON
 from datetime import datetime
 from app.database import Base
 
@@ -16,6 +17,7 @@ class Produto(Base):
     categoria = Column(String(50), nullable=False)
     ativo = Column(Boolean, default=True)
     imagem_url = Column(String, nullable=True)
+    ingredientes_disponiveis = Column(JSON, nullable=True)
 
     itens_pedido = relationship("ItemPedido", back_populates="produto")
 
