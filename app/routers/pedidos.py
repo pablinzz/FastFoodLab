@@ -17,6 +17,7 @@ class ItemCarrinho(BaseModel):
 
 class PedidoRequest(BaseModel):
     itens: List[ItemCarrinho]
+    metodo_pagamento: str  # Novo campo: "PIX", "DEBITO", "CREDITO", ou "DINHEIRO"
 
 @router.post("/finalizar")
 def finalizar_pedido(req: PedidoRequest, db: Session = Depends(get_db)):
@@ -25,11 +26,18 @@ def finalizar_pedido(req: PedidoRequest, db: Session = Depends(get_db)):
 
     total = sum(item.preco for item in req.itens)
 
-    pedido = Pedido(total=total, status="AGUARDANDO_PAGAMENTO")
+    # Cria o pedido no banco de dados com base na forma de pagamento
+    if req.metodo_pagamento == "DINHEIRO":
+        status_inicial = "PAGAR_NO_CAIXA"
+    else:
+        status_inicial = "AGUARDANDO_PAGAMENTO"
+
+    pedido = Pedido(total=total, status=status_inicial)
     db.add(pedido)
     db.commit()
     db.refresh(pedido)
 
+    # Salva os itens do pedido
     for item in req.itens:
         item_pedido = ItemPedido(
             pedido_id=pedido.id, produto_id=item.id, quantidade=1, preco_unitario=item.preco
@@ -37,19 +45,26 @@ def finalizar_pedido(req: PedidoRequest, db: Session = Depends(get_db)):
         db.add(item_pedido)
     db.commit()
 
-    # Gera o QR Code do PIX na hora!
-    try:
-        pix_response = criar_pagamento_pix(pedido.id, float(pedido.total))
-        qr_code_base64 = pix_response["point_of_interaction"]["transaction_data"]["qr_code_base64"]
-        
-        return {
-            "pedido_id": pedido.id, 
-            "qr_code_base64": qr_code_base64
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Erro ao gerar PIX")
+    # --- LÓGICA DE PAGAMENTO ---
+    if req.metodo_pagamento == "PIX":
+        try:
+            pix_response = criar_pagamento_pix(pedido.id, float(pedido.total))
+            qr_code_base64 = pix_response["point_of_interaction"]["transaction_data"]["qr_code_base64"]
+            return {"pedido_id": pedido.id, "acao": "MOSTRAR_QR_CODE", "qr_code_base64": qr_code_base64}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail="Erro ao gerar PIX")
 
-# Rota para o Totem perguntar "O cliente já pagou?"
+    elif req.metodo_pagamento in ["DEBITO", "CREDITO"]:
+        # AQUI ENTRA A INTEGRAÇÃO COM A MAQUININHA FÍSICA NO FUTURO
+        # Ex: Acordar a maquininha do Mercado Pago Point via API.
+        # Por enquanto, retornamos para o Totem ficar aguardando o pagamento.
+        return {"pedido_id": pedido.id, "acao": "AGUARDANDO_MAQUININHA"}
+
+    elif req.metodo_pagamento == "DINHEIRO":
+        # Finaliza na hora e manda o cliente para o caixa
+        return {"pedido_id": pedido.id, "acao": "IR_PARA_CAIXA"}
+
+# Rota para checar status continua igual
 @router.get("/{pedido_id}/status")
 def checar_status(pedido_id: int, db: Session = Depends(get_db)):
     pedido = db.query(Pedido).filter(Pedido.id == pedido_id).first()

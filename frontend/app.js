@@ -92,53 +92,92 @@ function atualizarCarrinho() {
 }
 
 let pedidoAtualId = null;
-let intervaloPix = null;
+let intervaloChecagem = null;
 
-function finalizarPedido() {
-    if (carrinho.length === 0) return;
+function abrirModalPagamento() {
+    if (carrinho.length === 0) {
+        alert("Adicione itens ao carrinho primeiro!");
+        return;
+    }
+    document.getElementById("modal-escolha-pagamento").style.display = "flex";
+}
 
-    document.querySelector('.btn-finalizar').innerText = "GERANDO PIX...";
+function fecharModalPagamento() {
+    document.getElementById("modal-escolha-pagamento").style.display = "none";
+}
+
+function processarPagamento(metodo) {
+    fecharModalPagamento();
+    
+    // Mostra o modal de status carregando...
+    const modalStatus = document.getElementById("modal-status-generico");
+    document.getElementById("status-titulo").innerText = "Conectando ao sistema...";
+    document.getElementById("status-mensagem").innerText = "Aguarde um instante.";
+    document.getElementById("status-animacao").style.display = "block";
+    modalStatus.style.display = "flex";
 
     fetch(`${API_URL}/pedido/finalizar`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ itens: carrinho })
+        body: JSON.stringify({ itens: carrinho, metodo_pagamento: metodo })
     })
     .then(res => res.json())
     .then(data => {
-        document.querySelector('.btn-finalizar').innerText = "FINALIZAR E PAGAR";
-        
-        if (data.qr_code_base64) {
-            // Mostra o QR Code na tela
+        pedidoAtualId = data.pedido_id;
+
+        if (data.acao === "MOSTRAR_QR_CODE") {
+            modalStatus.style.display = "none"; // Esconde o genérico
             document.getElementById("qr-code-img").src = "data:image/jpeg;base64," + data.qr_code_base64;
-            document.getElementById("modal-pix").style.display = "flex";
-            
-            pedidoAtualId = data.pedido_id;
-            
-            // Fica checando de 3 em 3 segundos se o Webhook do MP avisou que o Pix caiu
-            intervaloPix = setInterval(checarStatusPix, 3000);
-        } else {
-            alert("Erro ao gerar PIX.");
+            document.getElementById("modal-pix").style.display = "flex"; // Mostra o do PIX
+            intervaloChecagem = setInterval(checarPagamentoAprovado, 3000);
+        } 
+        else if (data.acao === "AGUARDANDO_MAQUININHA") {
+            document.getElementById("status-titulo").innerText = "💳 Insira o Cartão";
+            document.getElementById("status-mensagem").innerText = "Siga as instruções na maquininha ao lado do tablet para digitar sua senha.";
+            document.getElementById("status-titulo").style.color = "#2196F3";
+            intervaloChecagem = setInterval(checarPagamentoAprovado, 3000); // Fica checando se a maquininha aprovou
         }
+        else if (data.acao === "IR_PARA_CAIXA") {
+            document.getElementById("status-titulo").innerText = "💵 Pedido Anotado!";
+            document.getElementById("status-mensagem").innerText = "Dirija-se ao caixa com o número do seu pedido para realizar o pagamento e retirar.";
+            document.getElementById("status-titulo").style.color = "#8BC34A";
+            document.getElementById("status-animacao").style.display = "none"; // Para de piscar
+            
+            // Após 6 segundos, reseta o totem para o próximo cliente
+            setTimeout(() => {
+                modalStatus.style.display = "none";
+                resetarTotem();
+            }, 6000);
+        }
+    })
+    .catch(err => {
+        alert("Erro de conexão. Tente novamente.");
+        modalStatus.style.display = "none";
     });
 }
 
-function checarStatusPix() {
+function checarPagamentoAprovado() {
     fetch(`${API_URL}/pedido/${pedidoAtualId}/status`)
     .then(res => res.json())
     .then(data => {
         if (data.status === "PAGO") {
-            clearInterval(intervaloPix);
+            clearInterval(intervaloChecagem);
             document.getElementById("modal-pix").style.display = "none";
+            document.getElementById("modal-status-generico").style.display = "none";
             
-            // Tela de Sucesso
             alert("🎉 Pagamento Aprovado! Seu pedido já está na tela da cozinha.");
             resetarTotem();
         }
     });
 }
 
-function cancelarPix() {
-    clearInterval(intervaloPix);
+function cancelarPedidoAtual() {
+    clearInterval(intervaloChecagem);
     document.getElementById("modal-pix").style.display = "none";
+    document.getElementById("modal-status-generico").style.display = "none";
+    // Opcional no futuro: Enviar rota para a API cancelar o pagamento na maquininha
+}
+
+function cancelarPix() {
+    cancelarPedidoAtual();
 }

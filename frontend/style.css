@@ -196,3 +196,48 @@ body {
 .status-pagamento { font-size: 1.4rem; font-weight: bold; color: #FF5E00; animation: piscar 1.5s infinite; }
 .btn-cancelar { background: #444; color: white; border: none; border-radius: 12px; padding: 15px 30px; font-size: 1.2rem; margin-top: 20px; cursor: pointer; }
 @keyframes piscar { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+/* --- BOTÕES DE ESCOLHA DE PAGAMENTO --- */
+.grid-pagamentos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.btn-pagamento {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #222;
+    border: 3px solid #333;
+    border-radius: 20px;
+    padding: 30px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-pagamento:active {
+    transform: scale(0.95);
+}
+
+.btn-pagamento .icone {
+    font-size: 4rem;
+    margin-bottom: 10px;
+}
+
+.btn-pagamento strong {
+    font-size: 1.8rem;
+    margin-bottom: 5px;
+}
+
+.btn-pagamento small {
+    font-size: 1.2rem;
+    color: #FF5E00;
+}
+
+/* Cores específicas se tocados */
+.btn-pagamento.pix:active { border-color: #32BCAD; background: #1a3a37; }
+.btn-pagamento.debito:active, .btn-pagamento.credito:active { border-color: #2196F3; background: #153c5e; }
+.btn-pagamento.dinheiro:active { border-color: #8BC34A; background: #263e18; }

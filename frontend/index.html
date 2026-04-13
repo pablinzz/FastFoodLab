@@ -35,8 +35,8 @@
                 <span>Total</span>
                 <span class="valor-total">R$ <span id="total">0.00</span></span>
             </div>
-            <button class="btn-finalizar" onclick="finalizarPedido()">
-                FINALIZAR E PAGAR
+            <button class="btn-finalizar" onclick="abrirModalPagamento()">
+                FINALIZAR PEDIDO
             </button>
         </div>
     </aside>
@@ -50,6 +50,49 @@
         <img id="qr-code-img" src="" alt="QR Code PIX">
         <p class="status-pagamento">⏳ Aguardando confirmação do pagamento...</p>
         <button onclick="cancelarPix()" class="btn-cancelar">Cancelar Pedido</button>
+    </div>
+</div>
+
+<div id="modal-escolha-pagamento" class="modal-overlay" style="display: none;">
+    <div class="modal-content" style="max-width: 800px; width: 90%;">
+        <h2 style="margin-bottom: 30px; font-size: 2.8rem; color: #fff;">Como prefere pagar?</h2>
+        
+        <div class="grid-pagamentos">
+            <button class="btn-pagamento pix" onclick="processarPagamento('PIX')">
+                <span class="icone">📱</span>
+                <strong>PIX</strong>
+                <small>QR Code na Tela</small>
+            </button>
+
+            <button class="btn-pagamento debito" onclick="processarPagamento('DEBITO')">
+                <span class="icone">💳</span>
+                <strong>DÉBITO</strong>
+                <small>Na maquininha ao lado</small>
+            </button>
+
+            <button class="btn-pagamento credito" onclick="processarPagamento('CREDITO')">
+                <span class="icone">💳</span>
+                <strong>CRÉDITO</strong>
+                <small>Na maquininha ao lado</small>
+            </button>
+
+            <button class="btn-pagamento dinheiro" onclick="processarPagamento('DINHEIRO')">
+                <span class="icone">💵</span>
+                <strong>DINHEIRO</strong>
+                <small>Pagar no Caixa</small>
+            </button>
+        </div>
+        
+        <button onclick="fecharModalPagamento()" class="btn-cancelar" style="margin-top: 40px; width: 100%;">Voltar</button>
+    </div>
+</div>
+
+<div id="modal-status-generico" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <h2 id="status-titulo">Aguardando...</h2>
+        <p id="status-mensagem" style="font-size: 1.5rem; margin: 20px 0; color: #ccc;"></p>
+        <p class="status-pagamento" id="status-animacao">⏳ Processando...</p>
+        <button onclick="cancelarPedidoAtual()" class="btn-cancelar">Cancelar Pedido</button>
     </div>
 </div>
 
