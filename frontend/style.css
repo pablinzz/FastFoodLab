@@ -1,243 +1,103 @@
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Nunito', sans-serif; /* Fonte mais amigável e moderna */
-    user-select: none; /* Evita que o cliente selecione textos sem querer no tablet */
+    margin: 0; padding: 0; box-sizing: border-box;
+    font-family: 'Nunito', sans-serif;
+    user-select: none;
 }
 
 body {
-    background-color: #0d0d0d; /* Fundo super escuro (estilo Lab/Industrial) */
-    color: #ffffff;
-    height: 100vh;
-    overflow: hidden; /* Trava a rolagem da página inteira */
+    background-color: #0a0a0a; color: #ffffff;
+    height: 100vh; display: flex; flex-direction: column;
+    overflow: hidden;
 }
 
-.container {
-    display: flex;
-    height: 100vh;
-    width: 100vw;
+/* TOPO */
+.topbar {
+    height: 80px; background: #111; border-bottom: 1px solid #222;
+    display: flex; align-items: center; padding: 0 40px; gap: 40px;
+}
+.logo { height: 50px; object-fit: contain; }
+.search-bar { flex: 1; max-width: 600px; }
+.search-bar input {
+    width: 100%; padding: 12px 20px; border-radius: 25px; border: none;
+    background: #222; color: white; font-size: 1.1rem; outline: none;
 }
 
-/* --- ÁREA DO MENU (ESQUERDA) --- */
-.menu-area {
-    flex: 2.5;
-    display: flex;
-    flex-direction: column;
-    background-color: #141414;
+/* ESTRUTURA PRINCIPAL */
+.app-container {
+    display: flex; flex: 1; overflow: hidden;
 }
 
-.topo {
-    padding: 20px 40px;
-    background: #000000;
-    border-bottom: 2px solid #222;
-    display: flex;
-    align-items: center;
-    gap: 20px;
+/* NAVEGAÇÃO ESQUERDA (CATEGORIAS) */
+.category-nav {
+    width: 250px; background: #111; padding: 20px;
+    overflow-y: auto; border-right: 1px solid #222;
 }
-
-.logo {
-    height: 60px; /* Ajuste conforme o formato da sua logo */
-    object-fit: contain;
-}
-
-.topo h1 {
-    font-size: 2rem;
-    font-weight: 800;
-    color: #FF5E00; /* Laranja vibrante - cor de fast food moderna */
-}
-
-.produtos {
-    flex: 1;
-    padding: 30px 40px;
-    overflow-y: auto; /* Apenas o menu rola, o carrinho fica fixo */
-}
-
-.grid-produtos {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 25px;
-    padding-bottom: 50px;
-}
-
-/* CARDS DE PRODUTOS */
-.card-produto {
-    background: #222222;
-    border-radius: 20px;
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.4);
-    transition: transform 0.1s ease;
-}
-
-.card-produto:active {
-    transform: scale(0.97); /* Efeito de aperto no card */
-}
-
-.card-produto h3 {
-    font-size: 1.4rem;
-    font-weight: 700;
-    margin-top: 10px;
-    margin-bottom: 5px;
-}
-
-.card-produto p {
-    font-size: 1.3rem;
-    font-weight: 800;
-    color: #FF5E00;
-    margin-bottom: 15px;
-}
-
-.card-produto button {
-    margin-top: auto;
-    background: #FF5E00;
-    color: #fff;
-    border: none;
-    border-radius: 12px;
-    padding: 15px;
-    font-size: 1.2rem;
-    font-weight: 800;
-    cursor: pointer;
-    text-transform: uppercase;
-}
-
-/* --- ÁREA DO CARRINHO (DIREITA) --- */
-.carrinho {
-    flex: 1;
-    background: #1a1a1a;
-    border-left: 3px solid #FF5E00;
-    display: flex;
-    flex-direction: column;
-}
-
-.carrinho-header {
-    padding: 30px;
-    background: #111;
-    border-bottom: 2px solid #222;
-}
-
-.carrinho-header h2 {
-    font-size: 1.8rem;
-    font-weight: 800;
-}
-
-.lista-itens {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-    list-style: none;
-}
-
-/* ITEM DENTRO DO CARRINHO */
-.lista-itens li {
-    background: #2a2a2a;
-    border-radius: 12px;
-    padding: 15px;
-    margin-bottom: 15px;
-    font-size: 1.2rem;
-    font-weight: 700;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-}
-
-.carrinho-footer {
-    background: #111;
-    padding: 30px;
-    border-top: 2px solid #222;
-}
-
-.total-area {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #aaa;
-}
-
-.valor-total {
-    font-size: 2.2rem;
-    font-weight: 800;
-    color: #4CAF50; /* Verde para o dinheiro */
-}
-
-.btn-finalizar {
-    width: 100%;
-    background: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 16px;
-    padding: 25px;
-    font-size: 1.6rem;
-    font-weight: 800;
-    cursor: pointer;
-    box-shadow: 0 6px 0 #2E7D32; /* Efeito 3D no botão */
-    transition: transform 0.1s, box-shadow 0.1s;
-}
-
-.btn-finalizar:active {
-    transform: translateY(6px);
-    box-shadow: 0 0 0 #2E7D32; /* O botão "afunda" ao ser tocado */
-}
-
-.modal-overlay {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(0, 0, 0, 0.95);
-    display: flex; justify-content: center; align-items: center;
-    z-index: 1000;
-}
-.modal-content {
-    background: #1a1a1a; padding: 50px; border-radius: 20px;
-    text-align: center; border: 3px solid #FF5E00; max-width: 500px;
-}
-.modal-content h2 { font-size: 2.5rem; margin-bottom: 10px; color: #4CAF50; }
-.modal-content img { width: 300px; height: 300px; margin: 30px 0; border-radius: 15px; background: white; padding: 10px; }
-.status-pagamento { font-size: 1.4rem; font-weight: bold; color: #FF5E00; animation: piscar 1.5s infinite; }
-.btn-cancelar { background: #444; color: white; border: none; border-radius: 12px; padding: 15px 30px; font-size: 1.2rem; margin-top: 20px; cursor: pointer; }
-@keyframes piscar { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-
-/* --- BOTÕES DE ESCOLHA DE PAGAMENTO --- */
-.grid-pagamentos {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-}
-
-.btn-pagamento {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: #222;
-    border: 3px solid #333;
-    border-radius: 20px;
-    padding: 30px;
-    color: white;
-    cursor: pointer;
+.cat-link {
+    display: block; padding: 15px; color: #888; text-decoration: none;
+    font-size: 1.2rem; font-weight: 700; border-radius: 12px; margin-bottom: 5px;
     transition: all 0.2s;
 }
-
-.btn-pagamento:active {
-    transform: scale(0.95);
+.cat-link:hover, .cat-link.active {
+    background: #222; color: #FF5E00;
 }
 
-.btn-pagamento .icone {
-    font-size: 4rem;
-    margin-bottom: 10px;
+/* FEED CENTRAL (PRODUTOS) */
+.product-feed {
+    flex: 1; padding: 30px 40px; overflow-y: auto; scroll-behavior: smooth;
+}
+.categoria-section { margin-bottom: 40px; }
+.categoria-section h2 {
+    font-size: 2rem; margin-bottom: 20px; color: #fff; border-bottom: 2px solid #222; padding-bottom: 10px;
+}
+.grid-ifood {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 20px;
 }
 
-.btn-pagamento strong {
-    font-size: 1.8rem;
-    margin-bottom: 5px;
+/* CARDS ESTILO IFOOD */
+.card-ifood {
+    display: flex; justify-content: space-between; align-items: center;
+    background: #1a1a1a; border: 1px solid #222; border-radius: 16px; padding: 20px;
+    cursor: pointer; transition: transform 0.1s, border-color 0.2s;
 }
+.card-ifood:active { transform: scale(0.98); border-color: #FF5E00; }
+.card-info { flex: 1; padding-right: 15px; }
+.card-info h3 { font-size: 1.3rem; margin-bottom: 5px; }
+.card-info .desc { font-size: 0.95rem; color: #888; margin-bottom: 15px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.card-info .preco { font-size: 1.2rem; font-weight: 800; color: #4CAF50; }
+.card-img-wrapper { width: 120px; height: 120px; flex-shrink: 0; }
+.card-img-wrapper img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
 
-.btn-pagamento small {
-    font-size: 1.2rem;
-    color: #FF5E00;
+/* CARRINHO (DIREITA) */
+.cart-sidebar {
+    width: 380px; background: #141414; border-left: 1px solid #222;
+    display: flex; flex-direction: column;
 }
+.carrinho-header { padding: 25px; border-bottom: 1px solid #222; }
+.lista-itens { flex: 1; overflow-y: auto; padding: 20px; list-style: none; }
+.item-carrinho { background: #222; padding: 15px; border-radius: 12px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: flex-start;}
+.item-carrinho-info { flex: 1; }
+.item-carrinho-nome { font-weight: bold; font-size: 1.1rem; }
+.item-carrinho-obs { font-size: 0.85rem; color: #FF5E00; margin-top: 5px; display: block; }
+.btn-remover { background: #e53935; color: white; border: none; border-radius: 8px; width: 35px; height: 35px; font-weight: bold; cursor: pointer; margin-left: 10px; }
 
-/* Cores específicas se tocados */
-.btn-pagamento.pix:active { border-color: #32BCAD; background: #1a3a37; }
-.btn-pagamento.debito:active, .btn-pagamento.credito:active { border-color: #2196F3; background: #153c5e; }
-.btn-pagamento.dinheiro:active { border-color: #8BC34A; background: #263e18; }
+.carrinho-footer { padding: 25px; background: #111; border-top: 1px solid #222; }
+.total-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-size: 1.4rem; font-weight: bold; }
+.valor-total { color: #4CAF50; font-size: 2rem; }
+.btn-finalizar { width: 100%; background: #FF5E00; color: white; border: none; padding: 20px; border-radius: 12px; font-size: 1.3rem; font-weight: bold; cursor: pointer; }
+
+/* MODAIS */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+.modal-content { background: #1a1a1a; border-radius: 16px; border: 1px solid #333; position: relative; width: 100%; }
+.btn-fechar-canto { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1.2rem; cursor: pointer; }
+
+.extra-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #333; }
+.extra-item input[type="checkbox"] { width: 25px; height: 25px; accent-color: #FF5E00; margin-right: 15px; }
+.extra-info { flex: 1; display: flex; justify-content: space-between; font-size: 1.1rem; }
+
+/* PAGAMENTOS */
+.grid-pagamentos { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.btn-pagamento { background: #222; border: 2px solid #333; padding: 30px; border-radius: 16px; color: white; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+.btn-pagamento .icone { font-size: 3rem; margin-bottom: 10px; }
+.btn-cancelar { background: #333; color: white; border: none; padding: 15px; border-radius: 10px; font-size: 1.1rem; cursor: pointer; }
+
+@keyframes piscar { 0% {opacity:1;} 50% {opacity:0.5;} 100% {opacity:1;} }

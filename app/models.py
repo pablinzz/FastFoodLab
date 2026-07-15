@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean, JSON
+from sqlalchemy import Column, Integer, String, Float, Boolean
+from sqlalchemy.dialects.postgresql import JSON
 from app.database import Base
 
 class Produto(Base):
@@ -10,8 +11,6 @@ class Produto(Base):
     categoria = Column(String, nullable=True)
     ativo = Column(Boolean, default=True)
     imagem_url = Column(String, nullable=True)
-    
-    # NOVO CAMPO: Guarda a lista de ingredientes extras e preços
     ingredientes_disponiveis = Column(JSON, nullable=True)
 
 class Pedido(Base):
@@ -27,6 +26,4 @@ class ItemPedido(Base):
     produto_id = Column(Integer)
     quantidade = Column(Integer)
     preco_unitario = Column(Float)
-    
-    # NOVO CAMPO FUTURO: Para a cozinha saber o que o cliente escolheu ("Sem cebola", etc)
     observacoes = Column(String, nullable=True)

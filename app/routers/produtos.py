@@ -7,18 +7,18 @@ from app.models import Produto
 
 router = APIRouter(prefix="/produtos", tags=["Produtos"])
 
-# Atualizamos o modelo que o FastAPI espera receber do Frontend
 class ProdutoCreate(BaseModel):
     nome: str
     preco: float
     categoria: Optional[str] = None
     imagem_url: Optional[str] = None
-    ingredientes_disponiveis: Optional[List[Dict[str, Any]]] = None # Recebe a lista de extras
+    ingredientes_disponiveis: Optional[List[Dict[str, Any]]] = None
 
+# Definimos com e sem barra final para evitar bloqueios CORS de navegadores!
 @router.get("")
+@router.get("/")
 def listar_produtos(db: Session = Depends(get_db)):
     produtos = db.query(Produto).filter(Produto.ativo == True).all()
-    # Adicionamos os ingredientes no retorno para o Totem poder ler
     return [
         {
             "id": p.id, 
@@ -31,13 +31,14 @@ def listar_produtos(db: Session = Depends(get_db)):
     ]
 
 @router.post("")
+@router.post("/")
 def criar_produto(produto: ProdutoCreate, db: Session = Depends(get_db)):
     novo_produto = Produto(
         nome=produto.nome, 
         preco=produto.preco, 
         categoria=produto.categoria, 
         imagem_url=produto.imagem_url,
-        ingredientes_disponiveis=produto.ingredientes_disponiveis # Grava na base de dados
+        ingredientes_disponiveis=produto.ingredientes_disponiveis
     )
     db.add(novo_produto)
     db.commit()
