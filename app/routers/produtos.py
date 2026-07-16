@@ -45,6 +45,22 @@ def criar_produto(produto: ProdutoCreate, db: Session = Depends(get_db)):
     db.refresh(novo_produto)
     return novo_produto
 
+@router.put("/{produto_id}")
+def atualizar_produto(produto_id: int, produto: ProdutoCreate, db: Session = Depends(get_db)):
+    prod_db = db.query(Produto).filter(Produto.id == produto_id).first()
+    if not prod_db:
+        raise HTTPException(status_code=404, detail="Produto não encontrado")
+    
+    prod_db.nome = produto.nome
+    prod_db.preco = produto.preco
+    prod_db.categoria = produto.categoria
+    prod_db.imagem_url = produto.imagem_url
+    prod_db.ingredientes_disponiveis = produto.ingredientes_disponiveis
+    
+    db.commit()
+    db.refresh(prod_db)
+    return prod_db
+
 @router.delete("/{produto_id}")
 def deletar_produto(produto_id: int, db: Session = Depends(get_db)):
     produto = db.query(Produto).filter(Produto.id == produto_id).first()

@@ -181,24 +181,26 @@
 
     <script>
         const API_URL = "https://fastfoodlab.onrender.com";
+        let produtosAdmin = [];
+        let produtoEditandoId = null;
 
         // --- GESTÃO DE INGREDIENTES NO FORMULÁRIO ---
-        function adicionarLinhaIngrediente() {
+        function adicionarLinhaIngrediente(nome = "", preco = "") {
             const container = document.getElementById("lista-ingredientes");
             const row = document.createElement("div");
             row.className = "ingrediente-row";
             row.innerHTML = `
-                <input type="text" placeholder="Ex: Bacon Extra" class="ing-nome" style="flex: 2;" required>
-                <input type="number" step="0.01" placeholder="R$ 0,00" class="ing-preco" style="flex: 1;" required>
+                <input type="text" placeholder="Ex: Bacon Extra" class="ing-nome" style="flex: 2;" required value="${nome}">
+                <input type="number" step="0.01" placeholder="R$ 0,00" class="ing-preco" style="flex: 1;" required value="${preco}">
                 <button type="button" class="btn-remover-ing" onclick="this.parentElement.remove()">X</button>
             `;
             container.appendChild(row);
         }
 
-        // --- CADASTRAR PRODUTO ---
+        // --- CADASTRAR OU EDITAR PRODUTO ---
         document.getElementById("produto-form").onsubmit = async (e) => {
             e.preventDefault();
-            const btn = document.querySelector(".btn-salvar");
+            const btn = document.getElementById("btn-salvar-form");
             btn.innerText = "Salvando...";
             btn.disabled = true;
 
@@ -224,27 +226,81 @@
             };
 
             try {
-                const response = await fetch(`${API_URL}/produtos/`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(dados)
-                });
+                let response;
+                if (produtoEditandoId) {
+                    // MODO EDIÇÃO (PUT)
+                    response = await fetch(`${API_URL}/produtos/${produtoEditandoId}`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(dados)
+                    });
+                } else {
+                    // MODO CRIAÇÃO (POST)
+                    response = await fetch(`${API_URL}/produtos/`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(dados)
+                    });
+                }
 
                 if (response.ok) {
-                    alert("✅ Produto cadastrado com sucesso!");
-                    document.getElementById("produto-form").reset();
-                    document.getElementById("lista-ingredientes").innerHTML = "";
-                    carregarListaProdutos(); // Recarrega a lista à direita
+                    alert(produtoEditandoId ? "✅ Produto atualizado com sucesso!" : "✅ Produto cadastrado com sucesso!");
+                    cancelarEdicao(); // Reseta o form para o modo normal
+                    carregarListaProdutos(); // Atualiza a lista da direita
                 } else {
                     alert("❌ Erro ao salvar o produto.");
                 }
             } catch (err) {
-                alert("Erro de conexão.");
+                alert("Erro de conexão com a API.");
             } finally {
-                btn.innerText = "CADASTRAR PRODUTO";
+                btn.innerText = produtoEditandoId ? "💾 ATUALIZAR PRODUTO" : "CADASTRAR PRODUTO";
                 btn.disabled = false;
             }
         };
+
+        // --- PREPARAR PARA EDITAR UM ITEM ---
+        function editarProduto(id) {
+            const prod = produtosAdmin.find(p => p.id === id);
+            if (!prod) return;
+
+            // Preenche a esquerda com os dados da direita
+            produtoEditandoId = prod.id;
+            document.getElementById("nome").value = prod.nome;
+            document.getElementById("preco").value = prod.preco;
+            document.getElementById("categoria").value = prod.categoria || "Lanches";
+            document.getElementById("imagem_url").value = prod.imagem_url || "";
+
+            document.getElementById("lista-ingredientes").innerHTML = "";
+            if (prod.ingredientes_disponiveis) {
+                prod.ingredientes_disponiveis.forEach(ing => {
+                    adicionarLinhaIngrediente(ing.nome, ing.preco);
+                });
+            }
+
+            // Altera o visual do formulário para modo Edição
+            document.getElementById("titulo-formulario").innerText = "✏️ Editando Produto";
+            const btnSalvar = document.getElementById("btn-salvar-form");
+            btnSalvar.innerText = "💾 ATUALIZAR PRODUTO";
+            btnSalvar.style.background = "var(--yellow)";
+            document.getElementById("btn-cancelar-edicao").style.display = "block";
+            
+            // Faz scroll para o topo caso esteja a editar no telemóvel
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- CANCELAR MODO EDIÇÃO ---
+        function cancelarEdicao() {
+            produtoEditandoId = null;
+            document.getElementById("produto-form").reset();
+            document.getElementById("lista-ingredientes").innerHTML = "";
+            
+            // Devolve o visual do formulário ao normal
+            document.getElementById("titulo-formulario").innerText = "➕ Cadastrar Novo Produto";
+            const btnSalvar = document.getElementById("btn-salvar-form");
+            btnSalvar.innerText = "CADASTRAR PRODUTO";
+            btnSalvar.style.background = "var(--green)";
+            document.getElementById("btn-cancelar-edicao").style.display = "none";
+        }
 
         // --- CARREGAR LISTA DE PRODUTOS ---
         async function carregarListaProdutos() {
@@ -253,6 +309,7 @@
                 const response = await fetch(`${API_URL}/produtos/`);
                 const produtos = await response.json();
 
+                produtosAdmin = produtos; // Salva na memória global para podermos editar
                 container.innerHTML = "";
 
                 if (produtos.length === 0) {
@@ -272,9 +329,14 @@
                             <div class="produto-categoria">${prod.categoria || 'Geral'}</div>
                             <div class="produto-preco">R$ ${prod.preco.toFixed(2)}</div>
                         </div>
-                        <button class="btn-apagar-produto" onclick="apagarProduto(${prod.id}, '${prod.nome}')">
-                            🗑️ Apagar
-                        </button>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <button class="btn-editar-produto" onclick="editarProduto(${prod.id})">
+                                ✏️ Editar
+                            </button>
+                            <button class="btn-apagar-produto" onclick="apagarProduto(${prod.id}, '${prod.nome}')">
+                                🗑️ Apagar
+                            </button>
+                        </div>
                     `;
                     container.appendChild(card);
                 });
@@ -293,7 +355,8 @@
                 });
 
                 if (response.ok) {
-                    carregarListaProdutos(); // Recarrega a lista sem recarregar a página toda
+                    if(produtoEditandoId === id) cancelarEdicao(); // Se apagar o que estava a editar, cancela
+                    carregarListaProdutos();
                 } else {
                     alert("Erro ao apagar o produto.");
                 }
