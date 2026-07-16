@@ -140,71 +140,121 @@ function atualizarPrecoModal() {
     document.getElementById("preco-total-modal").innerText = `R$ ${precoFinal.toFixed(2)}`;
 }
 
+// 🚀 A MÁGICA DA ANIMAÇÃO E QUANTIDADE ACONTECE AQUI
 function confirmarPersonalizacao() {
     let precoFinal = produtoSelecionado.preco;
     let observacoes = extrasEscolhidos.map(e => `+ ${e.nome}`).join(", ");
     extrasEscolhidos.forEach(e => precoFinal += e.preco);
 
-    // VERIFICA SE O ITEM JÁ EXISTE NO CARRINHO (Com os mesmos ingredientes)
-    let itemExistente = carrinho.find(i => i.id === produtoSelecionado.id && i.observacoes === observacoes);
+    // Mostra o ✅ gigante
+    const modalSucesso = document.getElementById("modal-sucesso");
+    modalSucesso.style.display = "flex";
 
-    if (itemExistente) {
-        itemExistente.quantidade += 1; // Se existir, soma 1 na quantidade
-    } else {
-        carrinho.push({
-            id: produtoSelecionado.id,
-            nome: produtoSelecionado.nome,
-            preco: precoFinal,
-            observacoes: observacoes,
-            quantidade: 1, // Novo item começa com 1
-            uniqueId: Date.now() + Math.random()
-        });
-    }
+    // Espera 800 milissegundos para o cliente ver a animação e depois joga para o carrinho
+    setTimeout(() => {
+        modalSucesso.style.display = "none";
+        fecharModalPersonalizar();
 
-    fecharModalPersonalizar();
-    atualizarCarrinho();
+        // Verifica se o item já existe no carrinho para somar a quantidade
+        let itemExistente = carrinho.find(i => i.id === produtoSelecionado.id && i.observacoes === observacoes);
+
+        if (itemExistente) {
+            itemExistente.quantidade += 1;
+            itemExistente.novo = true; // Acende a animação no carrinho
+        } else {
+            carrinho.push({
+                id: produtoSelecionado.id,
+                nome: produtoSelecionado.nome,
+                preco: precoFinal,
+                observacoes: observacoes,
+                quantidade: 1, 
+                uniqueId: Date.now() + Math.random(),
+                novo: true // Acende a animação no carrinho
+            });
+        }
+
+        total += precoFinal;
+        atualizarCarrinho();
+
+    }, 800);
 }
 
 // --- 4. CARRINHO E QUANTIDADES ---
 function atualizarCarrinho() {
     const lista = document.getElementById("itens-carrinho");
     lista.innerHTML = "";
-    total = 0; // Recalcula do zero
 
     if (carrinho.length === 0) {
         lista.innerHTML = `<div style="color: #666; text-align: center; margin-top: 50px;">Seu carrinho está vazio</div>`;
     } else {
         carrinho.forEach(item => {
-            total += (item.preco * item.quantidade); // Soma preço x quantidade
             const obs = item.observacoes ? `<span class="item-carrinho-obs">${item.observacoes}</span>` : '';
             
+            // Lógica para deslizar da direita
+            const classNovo = item.novo ? 'novo-item' : '';
+            item.novo = false; 
+
             lista.innerHTML += `
-                <li class="item-carrinho">
+                <li class="item-carrinho ${classNovo}">
                     <div class="item-carrinho-info">
                         <div class="item-carrinho-nome">${item.nome}</div>
                         <div style="color: var(--green); font-weight: bold; margin-top: 5px;">R$ ${(item.preco * item.quantidade).toFixed(2)}</div>
                         ${obs}
                     </div>
-                    <!-- NOVOS BOTÕES + E - -->
+                    
+                    <!-- Botões Rápidos + e - -->
                     <div class="controles-quantidade">
-                        <button onclick="alterarQuantidade(${item.uniqueId}, -1)" class="btn-qtd">-</button>
+                        <button class="btn-qtd" onclick="alterarQuantidade(${item.uniqueId}, -1)">-</button>
                         <span class="qtd-numero">${item.quantidade}</span>
-                        <button onclick="alterarQuantidade(${item.uniqueId}, 1)" class="btn-qtd">+</button>
+                        <button class="btn-qtd" onclick="alterarQuantidade(${item.uniqueId}, 1)">+</button>
                     </div>
                 </li>
             `;
         });
     }
-    document.getElementById("total").innerText = total.toFixed(2);
+
+    function cancelarPedidoTotem() {
+    if (carrinho.length === 0) {
+        // Se o carrinho já estiver vazio, volta apenas ao ecrã inicial
+        document.getElementById("splash-screen").style.display = "flex";
+        clienteNome = "";
+        clienteConsumo = "";
+        return;
+    }
+    
+    if (confirm("Tem a certeza que deseja cancelar o pedido e esvaziar o carrinho?")) {
+        // Limpa tudo
+        carrinho = [];
+        total = 0;
+        clienteNome = "";
+        clienteConsumo = "";
+        
+        atualizarCarrinho();
+        
+        // Volta a exibir o Ecrã Gigante de Boas-Vindas
+        document.getElementById("splash-screen").style.display = "flex";
+    }
+}
+    
+    // Animação do Preço a Saltar
+    const totalSpan = document.getElementById("total");
+    totalSpan.innerText = total.toFixed(2);
+    totalSpan.classList.remove("pulse-text");
+    void totalSpan.offsetWidth; 
+    totalSpan.classList.add("pulse-text");
 }
 
 function alterarQuantidade(uniqueId, alteracao) {
     let item = carrinho.find(i => i.uniqueId === uniqueId);
     if (item) {
         item.quantidade += alteracao;
+        total += (item.preco * alteracao);
+        
         if (item.quantidade <= 0) {
-            // Se chegar a 0, remove do carrinho
             carrinho = carrinho.filter(i => i.uniqueId !== uniqueId);
+        } else {
+            // Animação subtil ao alterar
+            item.novo = true; 
         }
         atualizarCarrinho();
     }

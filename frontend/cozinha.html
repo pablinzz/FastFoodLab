@@ -52,7 +52,7 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.5);
             animation: fadeIn 0.5s ease-in-out;
         }
-
+        
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .pedido-header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
@@ -96,6 +96,11 @@
         ::-webkit-scrollbar-thumb:hover { background: var(--yellow); }
         
         .vazio { text-align: center; color: var(--text-muted); font-size: 1.5rem; margin-top: 50px; grid-column: 1 / -1; }
+        .btn-acao-cancelar {
+        background: #333; color: white; border: none; border-radius: 12px;
+        padding: 0 20px; font-size: 1.5rem; cursor: pointer; transition: 0.2s;
+        }
+        .btn-acao-cancelar:hover { background: #e74c3c; }
     </style>
 </head>
 <body>
@@ -222,24 +227,23 @@
                     });
                     itensHtml += `</div>`;
 
-                    // Lógica dos Botões baseada no Status
-                    let btnTexto = "";
-                    let novoStatus = "";
-
-                    if (pedido.status === 'AGUARDANDO_PAGAMENTO' || pedido.status === 'PAGAR_NO_CAIXA') {
-                        btnTexto = '💸 CONFIRMAR PAGAMENTO';
-                        novoStatus = 'PAGO';
-                    } else if (pedido.status === 'PAGO') {
-                        btnTexto = 'COMEÇAR A PREPARAR';
-                        novoStatus = 'PREPARANDO';
-                    } else if (pedido.status === 'PREPARANDO') {
-                        btnTexto = 'PRONTO PARA ENTREGAR ✅';
-                        novoStatus = 'FINALIZADO';
+                    // Rodapé (Botões de Ação + Botão Cancelar)
+                    let btnTexto = "COMEÇAR A PREPARAR";
+                    let novoStatus = "PREPARANDO";
+                    
+                    if (pedido.status === 'PREPARANDO') {
+                        btnTexto = "PRONTO PARA ENTREGAR ✅";
+                        novoStatus = "FINALIZADO";
+                    } else if (pedido.status === 'AGUARDANDO_PAGAMENTO' || pedido.status === 'PAGAR_NO_CAIXA') {
+                        btnTexto = "💸 CONFIRMAR PAGAMENTO";
+                        novoStatus = "PAGO";
                     }
                     
+                    // O footer agora é um Flexbox para ter o botão principal e o X ao lado
                     let footerHtml = `
-                        <div class="pedido-footer">
-                            <button class="btn-acao" onclick="atualizarStatus(${pedido.id}, '${novoStatus}')">${btnTexto}</button>
+                        <div class="pedido-footer" style="display: flex; gap: 10px;">
+                            <button class="btn-acao" style="flex: 1;" onclick="atualizarStatus(${pedido.id}, '${novoStatus}')">${btnTexto}</button>
+                            <button class="btn-acao-cancelar" onclick="cancelarPedidoCozinha(${pedido.id})" title="Cancelar Pedido">❌</button>
                         </div>
                     `;
 
@@ -265,6 +269,22 @@
                 carregarPedidos(); 
             } catch (error) {
                 alert("Erro ao atualizar o pedido.");
+            }
+        }
+
+        // --- NOVA FUNÇÃO DA COZINHA PARA CANCELAR ---
+        async function cancelarPedidoCozinha(pedidoId) {
+            if(confirm("Deseja realmente CANCELAR este pedido? Ele desaparecerá do ecrã.")) {
+                try {
+                    await fetch(`${API_URL}/cozinha/pedidos/${pedidoId}/status`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status: 'CANCELADO' })
+                    });
+                    carregarPedidos(); // Recarrega para remover do ecrã
+                } catch (error) {
+                    alert("Erro ao cancelar o pedido.");
+                }
             }
         }
 

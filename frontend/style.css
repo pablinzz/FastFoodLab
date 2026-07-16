@@ -167,3 +167,73 @@ font-weight: bold;
 font-size: 1.1rem;
 color: white;
 }
+
+/* 🚀 NOVAS ANIMAÇÕES (Feedback Visual) */
+@keyframes popIn {
+0% { transform: scale(0); opacity: 0; }
+80% { transform: scale(1.2); opacity: 1; }
+100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fadeIn {
+from { opacity: 0; transform: translateY(10px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+from { transform: translateX(100px); opacity: 0; }
+to { transform: translateX(0); opacity: 1; }
+}
+
+.item-carrinho.novo-item {
+animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes pulseTotal {
+0% { transform: scale(1); color: var(--green); }
+50% { transform: scale(1.3); color: #fff; }
+100% { transform: scale(1); color: var(--green); }
+}
+
+.pulse-text {
+animation: pulseTotal 0.4s ease-out;
+display: inline-block; /* Necessário para o transform scale funcionar */
+}
+
+/* 🚀 ESTILOS DOS BOTÕES + E - NO CARRINHO */
+.controles-quantidade {
+display: flex; align-items: center; background: #222;
+border-radius: 8px; margin-left: 15px; border: 1px solid var(--border); overflow: hidden;
+}
+.btn-qtd {
+background: transparent; color: var(--yellow); border: none;
+width: 40px; height: 40px; font-size: 1.5rem; font-weight: bold;
+cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center;
+}
+.btn-qtd:hover { background: #333; }
+.btn-qtd:active { background: var(--yellow); color: black; }
+.qtd-numero {
+width: 30px; text-align: center; color: white;
+font-weight: bold; font-size: 1.1rem;
+}
+
+/* NOVO: Botão de Cancelar Pedido no Carrinho */
+.btn-cancelar-pedido {
+    width: 100%; 
+    background: transparent; 
+    color: var(--danger, #e74c3c);
+    border: 2px solid var(--danger, #e74c3c); 
+    padding: 15px; 
+    border-radius: 12px;
+    font-size: 1.1rem; 
+    font-weight: bold; 
+    cursor: pointer; 
+    margin-top: 15px; 
+    transition: 0.2s;
+}
+.btn-cancelar-pedido:hover {
+    background: rgba(231, 76, 60, 0.1);
+}
+.btn-cancelar-pedido:active {
+    transform: scale(0.98);
+}

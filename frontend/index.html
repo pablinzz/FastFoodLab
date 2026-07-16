@@ -12,9 +12,8 @@
 
 <!-- TOPO FIXO -->
 <header class="topbar">
-    <div class="brand-area" style="display: flex; align-items: center;">
-        <img src="./logo.png" alt="Boteco do MK" style="height: 50px; border-radius: 50%; margin-right: 15px;">
-        <h1 style="color: var(--yellow); font-weight: 800; font-size: 1.8rem;">Boteco do MK</h1>
+    <div class="brand-area">
+        <h1 style="color: var(--yellow); font-weight: 800; font-size: 1.8rem; margin-right: 20px;">🍻 Boteco do MK</h1>
     </div>
     <div class="search-bar">
         <input type="text" placeholder="O que deseja pedir hoje?">
@@ -24,15 +23,11 @@
 <div class="app-container">
     <!-- MENU ESQUERDO (CATEGORIAS) -->
     <nav class="category-nav">
-        <div id="category-list">
-            <!-- As categorias entram aqui via JavaScript -->
-        </div>
+        <div id="category-list"></div>
     </nav>
 
     <!-- ÁREA CENTRAL (PRODUTOS) -->
-    <main class="product-feed" id="product-feed">
-        <!-- As secções de produtos entram aqui via JavaScript -->
-    </main>
+    <main class="product-feed" id="product-feed"></main>
 
     <!-- ÁREA DIREITA (CARRINHO) -->
     <aside class="cart-sidebar">
@@ -50,6 +45,8 @@
                 <span class="valor-total">R$ <span id="total">0.00</span></span>
             </div>
             <button class="btn-finalizar" onclick="abrirModalPagamento()">FINALIZAR PEDIDO</button>
+            <!-- NOVO BOTÃO DE CANCELAR -->
+            <button class="btn-cancelar-pedido" onclick="cancelarPedidoTotem()">Cancelar Pedido</button>
         </div>
     </aside>
 </div>
@@ -64,9 +61,7 @@
             <h2 id="nome-produto-modal" style="color: var(--yellow); font-size: 2rem;">Nome</h2>
             <p id="desc-produto-modal" style="color: #aaa; margin-bottom: 20px;">Delicioso e preparado na hora.</p>
             
-            <div id="lista-extras" style="text-align: left; max-height: 250px; overflow-y: auto; margin-bottom: 20px;">
-                <!-- Extras aqui -->
-            </div>
+            <div id="lista-extras" style="text-align: left; max-height: 250px; overflow-y: auto; margin-bottom: 20px;"></div>
 
             <div class="total-area-modal" style="background: #111; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333;">
                 <span style="font-size: 1.2rem; font-weight: bold;">Total do item:</span>
@@ -75,6 +70,13 @@
 
             <button class="btn-adicionar-modal" style="margin-top: 20px; width: 100%;" onclick="confirmarPersonalizacao()">Adicionar ao Carrinho</button>
         </div>
+
+        <!-- 🚀 NOVO: TELA DE SUCESSO (VISTO VERDE GIGANTE) -->
+        <div id="modal-sucesso" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 20, 20, 0.95); border-radius: 16px; z-index: 10; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(4px);">
+            <div style="font-size: 6rem; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);">✅</div>
+            <h2 style="color: var(--green); margin-top: 15px; font-size: 2rem; animation: fadeIn 0.5s ease-in;">Adicionado!</h2>
+        </div>
+
     </div>
 </div>
 
@@ -113,8 +115,7 @@
 <!-- TELA DE BOAS-VINDAS (SPLASH SCREEN) -->
 <div id="splash-screen" class="splash-screen" onclick="iniciarAtendimento()">
     <div class="splash-content">
-        <img src="./logo.png" alt="Logo Boteco do MK" style="height: 220px; border-radius: 50%; margin-bottom: 20px; box-shadow: 0 0 40px rgba(46, 204, 113, 0.3);">
-        <h1 style="color: var(--yellow); font-size: 4.5rem; font-weight: 900; margin-bottom: 20px;">Boteco do MK</h1>
+        <h1 style="color: var(--yellow); font-size: 4.5rem; font-weight: 900; margin-bottom: 20px;">🍻 Boteco do MK</h1>
         <p style="font-size: 2.2rem; color: white; animation: piscar 1.5s infinite;">Toque no ecrã para iniciar</p>
     </div>
 </div>
