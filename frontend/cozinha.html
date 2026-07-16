@@ -103,7 +103,7 @@
     <div class="header">
         <h1>
             👨‍🍳 Boteco do MK - Cozinha
-            <button id="btn-som" class="btn-som" onclick="ativarSom()">🔇 Som Desativado</button>
+            <button id="btn-som" class="btn-som" onclick="toggleSom()">🔇 Som Desativado</button>
         </h1>
         <div class="clock" id="relogio">00:00:00</div>
     </div>
@@ -119,21 +119,25 @@
         let audioCtx = null;
         let pedidosConhecidos = new Set();
 
-        // --- SISTEMA DE SOM (Web Audio API) ---
-        function ativarSom() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            
-            somAtivo = true;
+        // --- SISTEMA DE SOM (TOGGLE CORRIGIDO) ---
+        function toggleSom() {
             const btn = document.getElementById("btn-som");
-            btn.className = "btn-som ativo";
-            btn.innerText = "🔊 Som Ativado";
+            somAtivo = !somAtivo; // Inverte o estado (Liga/Desliga)
             
-            tocarCampainha();
+            if (somAtivo) {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                btn.className = "btn-som ativo";
+                btn.innerText = "🔊 Som Ativado";
+                tocarCampainha(); // Toca para testar
+            } else {
+                btn.className = "btn-som";
+                btn.innerText = "🔇 Som Desativado";
+            }
         }
 
         function tocarCampainha() {
@@ -251,7 +255,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ status: novoStatus })
                 });
-                carregarPedidos(); // Recarrega imediatamente após atualizar
+                carregarPedidos(); 
             } catch (error) {
                 alert("Erro ao atualizar o pedido.");
             }
@@ -266,14 +270,13 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ status: 'CANCELADO' })
                     });
-                    carregarPedidos(); // Recarrega para remover do ecrã
+                    carregarPedidos(); 
                 } catch (error) {
                     alert("Erro ao cancelar o pedido.");
                 }
             }
         }
 
-        // Atualiza a tela automaticamente a cada 5 segundos
         carregarPedidos();
         setInterval(carregarPedidos, 5000);
     </script>

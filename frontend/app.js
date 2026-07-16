@@ -34,6 +34,7 @@ function cancelarPedidoTotem() {
         document.getElementById("splash-screen").style.display = "flex";
         clienteNome = "";
         clienteConsumo = "";
+        document.getElementById("nome-cliente").value = ""; // LIMPA O TEXTO DO ECRÃ
         return;
     }
     
@@ -42,6 +43,7 @@ function cancelarPedidoTotem() {
         total = 0;
         clienteNome = "";
         clienteConsumo = "";
+        document.getElementById("nome-cliente").value = ""; // LIMPA O TEXTO DO ECRÃ
         atualizarCarrinho();
         document.getElementById("splash-screen").style.display = "flex";
     }
@@ -203,7 +205,8 @@ function mostrarAnimacaoSucesso() {
     cartSidebar.style.boxShadow = "0 0 30px var(--green)";
     
     setTimeout(() => {
-        animacao.style.animation = "popOut 0.3s ease-in forwards";
+        animacao.style.opacity = "0";
+        animacao.style.transition = "0.3s";
         setTimeout(() => {
             animacao.remove();
             cartSidebar.style.boxShadow = "none";
@@ -211,7 +214,7 @@ function mostrarAnimacaoSucesso() {
     }, 800);
 }
 
-// --- CARRINHO, PAGAMENTO E QUANTIDADES ---
+// --- CARRINHO E QUANTIDADES ---
 function atualizarCarrinho() {
     const lista = document.getElementById("itens-carrinho");
     lista.innerHTML = "";
@@ -230,10 +233,10 @@ function atualizarCarrinho() {
                         <div style="color: var(--green); font-weight: bold; margin-top: 5px;">R$ ${precoTotalItem.toFixed(2)}</div>
                         ${obs}
                     </div>
-                    <div class="qtd-controles">
-                        <button class="btn-qtd" onclick="alterarQuantidade(${item.uniqueId}, -1)">-</button>
-                        <span class="qtd-numero">${item.quantidade}</span>
-                        <button class="btn-qtd" onclick="alterarQuantidade(${item.uniqueId}, 1)">+</button>
+                    <div class="qtd-controles" style="display: flex; align-items: center; background: #333; border-radius: 20px; padding: 5px;">
+                        <button style="background: transparent; color: white; border: none; font-size: 1.5rem; width: 30px; cursor: pointer;" onclick="alterarQuantidade(${item.uniqueId}, -1)">-</button>
+                        <span style="font-weight: bold; margin: 0 10px; font-size: 1.2rem;">${item.quantidade}</span>
+                        <button style="background: transparent; color: white; border: none; font-size: 1.5rem; width: 30px; cursor: pointer;" onclick="alterarQuantidade(${item.uniqueId}, 1)">+</button>
                     </div>
                 </li>
             `;
@@ -265,6 +268,7 @@ function removerDoCarrinho(uniqueId) {
     }
 }
 
+// --- PAGAMENTO ---
 function abrirModalPagamento() {
     if(carrinho.length === 0) return alert("Seu carrinho está vazio!");
     document.getElementById("modal-escolha-pagamento").style.display = "flex";
