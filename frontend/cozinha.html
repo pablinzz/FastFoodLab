@@ -22,16 +22,11 @@
         body { background-color: var(--bg-dark); color: var(--text-main); padding: 30px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid var(--border); padding-bottom: 20px; }
-        .header h1 { color: var(--yellow); font-weight: 900; font-size: 2.5rem; }
-        
-        .header-controls { display: flex; align-items: center; gap: 20px; }
+        .header h1 { color: var(--yellow); font-weight: 900; font-size: 2.5rem; display: flex; align-items: center; gap: 15px;}
         .clock { font-size: 1.5rem; color: var(--text-muted); font-weight: bold; }
-        
-        .btn-som {
-            background: #333; color: white; border: none; padding: 10px 20px; 
-            border-radius: 12px; font-size: 1.2rem; font-weight: bold; 
-            cursor: pointer; transition: 0.3s;
-        }
+
+        .btn-som { background: #333; color: white; border: none; padding: 10px 20px; border-radius: 12px; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-som.ativo { background: var(--green); color: #000; }
 
         .grid-pedidos {
             display: grid;
@@ -52,23 +47,21 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.5);
             animation: fadeIn 0.5s ease-in-out;
         }
-        
+
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .pedido-header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
         .pedido-header h2 { font-size: 1.8rem; color: #000; margin: 0; font-weight: 900; }
         .badge-consumo { background: rgba(0,0,0,0.2); padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 1rem; color: #000; }
 
-        /* CORES DO CABEÇALHO POR ESTADO */
-        .status-AGUARDANDO_PAGAMENTO .pedido-header, .status-PAGAR_NO_CAIXA .pedido-header { background: var(--danger); color: white; }
-        .status-AGUARDANDO_PAGAMENTO .pedido-header h2, .status-PAGAR_NO_CAIXA .pedido-header h2 { color: white; }
-        .status-AGUARDANDO_PAGAMENTO .badge-consumo, .status-PAGAR_NO_CAIXA .badge-consumo { color: white; background: rgba(255,255,255,0.2); }
-        .status-AGUARDANDO_PAGAMENTO, .status-PAGAR_NO_CAIXA { border-color: var(--danger); }
-
+        /* Cores do Cabeçalho consoante o Estado */
         .status-PAGO .pedido-header { background: var(--yellow); }
         .status-PREPARANDO .pedido-header { background: var(--green); }
+        .status-AGUARDANDO_PAGAMENTO .pedido-header, .status-PAGAR_NO_CAIXA .pedido-header { background: var(--danger); }
+        
         .status-PAGO { border-color: var(--yellow); }
         .status-PREPARANDO { border-color: var(--green); }
+        .status-AGUARDANDO_PAGAMENTO, .status-PAGAR_NO_CAIXA { border-color: var(--danger); }
 
         .pedido-body { padding: 20px; flex: 1; }
         .cliente-nome { font-size: 1.3rem; font-weight: 700; border-bottom: 1px dashed var(--border); padding-bottom: 10px; margin-bottom: 15px; color: #ddd; }
@@ -78,8 +71,8 @@
         .item-qtd { background: #333; color: white; padding: 2px 10px; border-radius: 8px; font-size: 1.1rem; }
         .item-obs { color: var(--yellow); font-weight: bold; font-size: 1.1rem; margin-left: 45px; margin-top: 5px; display: block; background: rgba(241, 196, 15, 0.1); padding: 8px; border-radius: 8px; border-left: 3px solid var(--yellow); }
 
-        .pedido-footer { padding: 15px; background: #111; }
-        .btn-acao { width: 100%; padding: 18px; border: none; border-radius: 12px; font-size: 1.3rem; font-weight: 900; cursor: pointer; transition: 0.2s; color: #000; }
+        .pedido-footer { padding: 15px; background: #111; display: flex; gap: 10px;}
+        .btn-acao { flex: 1; padding: 18px; border: none; border-radius: 12px; font-size: 1.3rem; font-weight: 900; cursor: pointer; transition: 0.2s; color: #000; }
         
         .status-AGUARDANDO_PAGAMENTO .btn-acao, .status-PAGAR_NO_CAIXA .btn-acao { background: var(--danger); color: white; }
         .status-AGUARDANDO_PAGAMENTO .btn-acao:hover, .status-PAGAR_NO_CAIXA .btn-acao:hover { background: #c0392b; }
@@ -90,27 +83,29 @@
         .status-PREPARANDO .btn-acao { background: var(--green); }
         .status-PREPARANDO .btn-acao:hover { background: #27ae60; }
 
+        .btn-acao-cancelar {
+            background: #333; color: white; border: none; border-radius: 12px;
+            padding: 0 20px; font-size: 1.5rem; cursor: pointer; transition: 0.2s;
+        }
+        .btn-acao-cancelar:hover { background: var(--danger); }
+
+        /* Scrollbar */
         ::-webkit-scrollbar { width: 10px; }
         ::-webkit-scrollbar-track { background: var(--bg-dark); }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 5px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--yellow); }
         
         .vazio { text-align: center; color: var(--text-muted); font-size: 1.5rem; margin-top: 50px; grid-column: 1 / -1; }
-        .btn-acao-cancelar {
-        background: #333; color: white; border: none; border-radius: 12px;
-        padding: 0 20px; font-size: 1.5rem; cursor: pointer; transition: 0.2s;
-        }
-        .btn-acao-cancelar:hover { background: #e74c3c; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>👨‍🍳 Boteco do MK - Cozinha</h1>
-        <div class="header-controls">
-            <button id="btn-som" class="btn-som" onclick="toggleSom()">🔇 Som Desativado</button>
-            <div class="clock" id="relogio">00:00:00</div>
-        </div>
+        <h1>
+            👨‍🍳 Boteco do MK - Cozinha
+            <button id="btn-som" class="btn-som" onclick="ativarSom()">🔇 Som Desativado</button>
+        </h1>
+        <div class="clock" id="relogio">00:00:00</div>
     </div>
 
     <div class="grid-pedidos" id="grid-pedidos">
@@ -119,57 +114,53 @@
 
     <script>
         const API_URL = "https://fastfoodlab.onrender.com";
-
-        // Variáveis de Controlo do Som
-        let somAtivado = false;
+        
+        let somAtivo = false;
+        let audioCtx = null;
         let pedidosConhecidos = new Set();
-        let primeiraCarga = true;
+
+        // --- SISTEMA DE SOM (Web Audio API) ---
+        function ativarSom() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            
+            somAtivo = true;
+            const btn = document.getElementById("btn-som");
+            btn.className = "btn-som ativo";
+            btn.innerText = "🔊 Som Ativado";
+            
+            tocarCampainha();
+        }
+
+        function tocarCampainha() {
+            if (!somAtivo || !audioCtx) return;
+            
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime); // Nota A5
+            osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.5); // Desce para A4
+            
+            gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1);
+            
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + 1);
+        }
 
         // Relógio
         setInterval(() => {
             const agora = new Date();
             document.getElementById('relogio').innerText = agora.toLocaleTimeString('pt-BR');
         }, 1000);
-
-        // --- SISTEMA DE ÁUDIO (Campainha Ding-Dong) ---
-        function tocarCampainha() {
-            if (!somAtivado) return;
-            try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                function playTone(freq, time, duration) {
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    osc.type = 'sine';
-                    osc.frequency.value = freq;
-                    gain.gain.setValueAtTime(1, time);
-                    gain.gain.exponentialRampToValueAtTime(0.01, time + duration);
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.start(time);
-                    osc.stop(time + duration);
-                }
-                playTone(880, ctx.currentTime, 0.5); // Ding
-                playTone(700, ctx.currentTime + 0.2, 0.8); // Dong
-            } catch (e) {
-                console.log("Áudio não suportado.");
-            }
-        }
-
-        // Ativar/Desativar Som
-        function toggleSom() {
-            somAtivado = !somAtivado;
-            const btn = document.getElementById("btn-som");
-            if (somAtivado) {
-                btn.innerText = "🔊 Som Ativado";
-                btn.style.background = "var(--green)";
-                btn.style.color = "#000";
-                tocarCampainha();
-            } else {
-                btn.innerText = "🔇 Som Desativado";
-                btn.style.background = "#333";
-                btn.style.color = "white";
-            }
-        }
 
         async function carregarPedidos() {
             try {
@@ -181,18 +172,20 @@
 
                 if (pedidos.length === 0) {
                     grid.innerHTML = '<div class="vazio">Nenhum pedido na fila no momento. Boas vendas! 🍻</div>';
-                    pedidosConhecidos.clear(); 
                     return;
                 }
 
-                let tocarAviso = false;
+                let tocouSomNestaRodada = false;
 
                 pedidos.forEach(pedido => {
-                    // Toca a campainha se for um pedido novo que entrou (independente do status)
-                    if (!primeiraCarga && !pedidosConhecidos.has(pedido.id)) {
-                        tocarAviso = true;
+                    // Verifica se é um pedido NOVO para tocar o som
+                    if (!pedidosConhecidos.has(pedido.id)) {
+                        pedidosConhecidos.add(pedido.id);
+                        if (pedido.status === 'PAGO' && !tocouSomNestaRodada) {
+                            tocarCampainha();
+                            tocouSomNestaRodada = true;
+                        }
                     }
-                    pedidosConhecidos.add(pedido.id);
 
                     const card = document.createElement('div');
                     card.className = `pedido-card status-${pedido.status}`;
@@ -207,11 +200,7 @@
 
                     // Corpo (Itens e Cliente)
                     let itensHtml = `<div class="pedido-body">`;
-                    let statusAviso = (pedido.status === 'AGUARDANDO_PAGAMENTO' || pedido.status === 'PAGAR_NO_CAIXA') 
-                                        ? `<span style="color:var(--danger); font-weight:bold; font-size: 0.9rem;">(FALTA PAGAR)</span>` 
-                                        : '';
-                    
-                    itensHtml += `<div class="cliente-nome">👤 ${pedido.nome_cliente} ${statusAviso}</div>`;
+                    itensHtml += `<div class="cliente-nome">👤 ${pedido.nome_cliente}</div>`;
                     
                     pedido.itens.forEach(item => {
                         let obsHtml = item.observacoes ? `<span class="item-obs">⚠️ Extras: ${item.observacoes}</span>` : '';
@@ -239,10 +228,9 @@
                         novoStatus = "PAGO";
                     }
                     
-                    // O footer agora é um Flexbox para ter o botão principal e o X ao lado
                     let footerHtml = `
-                        <div class="pedido-footer" style="display: flex; gap: 10px;">
-                            <button class="btn-acao" style="flex: 1;" onclick="atualizarStatus(${pedido.id}, '${novoStatus}')">${btnTexto}</button>
+                        <div class="pedido-footer">
+                            <button class="btn-acao" onclick="atualizarStatus(${pedido.id}, '${novoStatus}')">${btnTexto}</button>
                             <button class="btn-acao-cancelar" onclick="cancelarPedidoCozinha(${pedido.id})" title="Cancelar Pedido">❌</button>
                         </div>
                     `;
@@ -250,9 +238,6 @@
                     card.innerHTML = headerHtml + itensHtml + footerHtml;
                     grid.appendChild(card);
                 });
-
-                if (tocarAviso) tocarCampainha();
-                primeiraCarga = false;
 
             } catch (error) {
                 console.error("Erro ao carregar os pedidos:", error);
@@ -266,13 +251,13 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ status: novoStatus })
                 });
-                carregarPedidos(); 
+                carregarPedidos(); // Recarrega imediatamente após atualizar
             } catch (error) {
                 alert("Erro ao atualizar o pedido.");
             }
         }
 
-        // --- NOVA FUNÇÃO DA COZINHA PARA CANCELAR ---
+        // --- FUNÇÃO PARA A COZINHA CANCELAR PEDIDOS ---
         async function cancelarPedidoCozinha(pedidoId) {
             if(confirm("Deseja realmente CANCELAR este pedido? Ele desaparecerá do ecrã.")) {
                 try {
@@ -288,6 +273,7 @@
             }
         }
 
+        // Atualiza a tela automaticamente a cada 5 segundos
         carregarPedidos();
         setInterval(carregarPedidos, 5000);
     </script>

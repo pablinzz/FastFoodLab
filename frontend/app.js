@@ -7,7 +7,6 @@ let produtoSelecionado = null;
 let extrasEscolhidos = [];
 let pedidoAtualId = null;
 let intervaloChecagem = null;
-
 let clienteNome = "";
 let clienteConsumo = "";
 
@@ -24,13 +23,31 @@ function confirmarIdentificacao(tipoConsumo) {
         alert("Por favor, diga-nos o seu nome para o podermos chamar quando o pedido estiver pronto!");
         return;
     }
-    
     clienteNome = nomeInput;
     clienteConsumo = tipoConsumo;
     document.getElementById("modal-identificacao").style.display = "none";
 }
 
-// --- 1. CARREGAR PRODUTOS ---
+// --- FUNÇÃO CORRIGIDA DE CANCELAR NO TOTEM ---
+function cancelarPedidoTotem() {
+    if (carrinho.length === 0) {
+        document.getElementById("splash-screen").style.display = "flex";
+        clienteNome = "";
+        clienteConsumo = "";
+        return;
+    }
+    
+    if (confirm("Tem a certeza que deseja cancelar o pedido e esvaziar o carrinho?")) {
+        carrinho = [];
+        total = 0;
+        clienteNome = "";
+        clienteConsumo = "";
+        atualizarCarrinho();
+        document.getElementById("splash-screen").style.display = "flex";
+    }
+}
+
+// --- CARREGAR PRODUTOS ---
 async function carregarProdutos() {
     try {
         const response = await fetch(`${API_URL}/produtos/`);
@@ -47,9 +64,10 @@ async function carregarProdutos() {
         document.getElementById("product-feed").innerHTML = "<h2 style='color:red; text-align:center; margin-top:50px;'>Erro ao carregar o cardápio. Verifique o servidor.</h2>";
     }
 }
+
 carregarProdutos();
 
-// --- 2. DESENHAR LAYOUT IFOOD ---
+// --- DESENHAR LAYOUT IFOOD ---
 function renderizarLayoutIfood(produtos) {
     const nav = document.getElementById("category-list");
     const feed = document.getElementById("product-feed");
@@ -86,12 +104,13 @@ function renderizarLayoutIfood(produtos) {
     });
 }
 
-// --- 3. MODAL DE INGREDIENTES EXTRAS ---
+// --- MODAL DE INGREDIENTES EXTRAS ---
 function abrirModalPersonalizar(produtoId) {
     produtoSelecionado = todosProdutos.find(p => p.id === produtoId);
     extrasEscolhidos = []; 
 
     document.getElementById("nome-produto-modal").innerText = produtoSelecionado.nome;
+    
     if(produtoSelecionado.imagem_url) {
         document.getElementById("img-produto-modal").src = produtoSelecionado.imagem_url;
         document.getElementById("img-produto-modal").style.display = "block";
@@ -100,6 +119,7 @@ function abrirModalPersonalizar(produtoId) {
     }
 
     atualizarPrecoModal();
+
     const listaExtras = document.getElementById("lista-extras");
     listaExtras.innerHTML = "";
 
@@ -118,6 +138,7 @@ function abrirModalPersonalizar(produtoId) {
     } else {
         listaExtras.innerHTML = "<p style='color: #666; font-style: italic;'>Este produto não possui adicionais.</p>";
     }
+
     document.getElementById("modal-personalizar").style.display = "flex";
 }
 
@@ -140,46 +161,57 @@ function atualizarPrecoModal() {
     document.getElementById("preco-total-modal").innerText = `R$ ${precoFinal.toFixed(2)}`;
 }
 
-// 🚀 A MÁGICA DA ANIMAÇÃO E QUANTIDADE ACONTECE AQUI
 function confirmarPersonalizacao() {
-    let precoFinal = produtoSelecionado.preco;
+    let precoBaseComExtras = produtoSelecionado.preco;
     let observacoes = extrasEscolhidos.map(e => `+ ${e.nome}`).join(", ");
-    extrasEscolhidos.forEach(e => precoFinal += e.preco);
+    extrasEscolhidos.forEach(e => precoBaseComExtras += e.preco);
 
-    // Mostra o ✅ gigante
-    const modalSucesso = document.getElementById("modal-sucesso");
-    modalSucesso.style.display = "flex";
+    // Verifica se já existe um item idêntico no carrinho
+    let itemExistente = carrinho.find(i => i.id === produtoSelecionado.id && i.observacoes === observacoes);
 
-    // Espera 800 milissegundos para o cliente ver a animação e depois joga para o carrinho
+    if (itemExistente) {
+        itemExistente.quantidade += 1;
+    } else {
+        carrinho.push({
+            id: produtoSelecionado.id,
+            nome: produtoSelecionado.nome,
+            preco: precoBaseComExtras,
+            observacoes: observacoes,
+            quantidade: 1,
+            uniqueId: Date.now() + Math.random()
+        });
+    }
+
+    total += precoBaseComExtras;
+    atualizarCarrinho();
+    fecharModalPersonalizar();
+    mostrarAnimacaoSucesso();
+}
+
+function mostrarAnimacaoSucesso() {
+    const animacao = document.createElement("div");
+    animacao.innerHTML = "✅<br><span style='font-size: 1.5rem'>Adicionado!</span>";
+    animacao.style.cssText = `
+        position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.9); color: var(--green); padding: 40px;
+        border-radius: 20px; font-size: 5rem; text-align: center;
+        z-index: 9999; animation: popIn 0.3s ease-out; font-weight: bold; border: 2px solid var(--green);
+    `;
+    document.body.appendChild(animacao);
+
+    const cartSidebar = document.querySelector('.cart-sidebar');
+    cartSidebar.style.boxShadow = "0 0 30px var(--green)";
+    
     setTimeout(() => {
-        modalSucesso.style.display = "none";
-        fecharModalPersonalizar();
-
-        // Verifica se o item já existe no carrinho para somar a quantidade
-        let itemExistente = carrinho.find(i => i.id === produtoSelecionado.id && i.observacoes === observacoes);
-
-        if (itemExistente) {
-            itemExistente.quantidade += 1;
-            itemExistente.novo = true; // Acende a animação no carrinho
-        } else {
-            carrinho.push({
-                id: produtoSelecionado.id,
-                nome: produtoSelecionado.nome,
-                preco: precoFinal,
-                observacoes: observacoes,
-                quantidade: 1, 
-                uniqueId: Date.now() + Math.random(),
-                novo: true // Acende a animação no carrinho
-            });
-        }
-
-        total += precoFinal;
-        atualizarCarrinho();
-
+        animacao.style.animation = "popOut 0.3s ease-in forwards";
+        setTimeout(() => {
+            animacao.remove();
+            cartSidebar.style.boxShadow = "none";
+        }, 300);
     }, 800);
 }
 
-// --- 4. CARRINHO E QUANTIDADES ---
+// --- CARRINHO, PAGAMENTO E QUANTIDADES ---
 function atualizarCarrinho() {
     const lista = document.getElementById("itens-carrinho");
     lista.innerHTML = "";
@@ -189,21 +221,16 @@ function atualizarCarrinho() {
     } else {
         carrinho.forEach(item => {
             const obs = item.observacoes ? `<span class="item-carrinho-obs">${item.observacoes}</span>` : '';
+            const precoTotalItem = item.preco * item.quantidade;
             
-            // Lógica para deslizar da direita
-            const classNovo = item.novo ? 'novo-item' : '';
-            item.novo = false; 
-
             lista.innerHTML += `
-                <li class="item-carrinho ${classNovo}">
+                <li class="item-carrinho">
                     <div class="item-carrinho-info">
                         <div class="item-carrinho-nome">${item.nome}</div>
-                        <div style="color: var(--green); font-weight: bold; margin-top: 5px;">R$ ${(item.preco * item.quantidade).toFixed(2)}</div>
+                        <div style="color: var(--green); font-weight: bold; margin-top: 5px;">R$ ${precoTotalItem.toFixed(2)}</div>
                         ${obs}
                     </div>
-                    
-                    <!-- Botões Rápidos + e - -->
-                    <div class="controles-quantidade">
+                    <div class="qtd-controles">
                         <button class="btn-qtd" onclick="alterarQuantidade(${item.uniqueId}, -1)">-</button>
                         <span class="qtd-numero">${item.quantidade}</span>
                         <button class="btn-qtd" onclick="alterarQuantidade(${item.uniqueId}, 1)">+</button>
@@ -212,55 +239,32 @@ function atualizarCarrinho() {
             `;
         });
     }
+    document.getElementById("total").innerText = total.toFixed(2);
+}
 
-    function cancelarPedidoTotem() {
-    if (carrinho.length === 0) {
-        // Se o carrinho já estiver vazio, volta apenas ao ecrã inicial
-        document.getElementById("splash-screen").style.display = "flex";
-        clienteNome = "";
-        clienteConsumo = "";
+function alterarQuantidade(uniqueId, delta) {
+    let item = carrinho.find(i => i.uniqueId === uniqueId);
+    if (!item) return;
+
+    if (item.quantidade === 1 && delta === -1) {
+        removerDoCarrinho(uniqueId);
         return;
     }
-    
-    if (confirm("Tem a certeza que deseja cancelar o pedido e esvaziar o carrinho?")) {
-        // Limpa tudo
-        carrinho = [];
-        total = 0;
-        clienteNome = "";
-        clienteConsumo = "";
-        
-        atualizarCarrinho();
-        
-        // Volta a exibir o Ecrã Gigante de Boas-Vindas
-        document.getElementById("splash-screen").style.display = "flex";
-    }
-}
-    
-    // Animação do Preço a Saltar
-    const totalSpan = document.getElementById("total");
-    totalSpan.innerText = total.toFixed(2);
-    totalSpan.classList.remove("pulse-text");
-    void totalSpan.offsetWidth; 
-    totalSpan.classList.add("pulse-text");
+
+    item.quantidade += delta;
+    total += (item.preco * delta);
+    atualizarCarrinho();
 }
 
-function alterarQuantidade(uniqueId, alteracao) {
+function removerDoCarrinho(uniqueId) {
     let item = carrinho.find(i => i.uniqueId === uniqueId);
-    if (item) {
-        item.quantidade += alteracao;
-        total += (item.preco * alteracao);
-        
-        if (item.quantidade <= 0) {
-            carrinho = carrinho.filter(i => i.uniqueId !== uniqueId);
-        } else {
-            // Animação subtil ao alterar
-            item.novo = true; 
-        }
+    if(item) {
+        total = Math.max(0, total - (item.preco * item.quantidade));
+        carrinho = carrinho.filter(i => i.uniqueId !== uniqueId);
         atualizarCarrinho();
     }
 }
 
-// --- 5. PAGAMENTO ---
 function abrirModalPagamento() {
     if(carrinho.length === 0) return alert("Seu carrinho está vazio!");
     document.getElementById("modal-escolha-pagamento").style.display = "flex";
@@ -268,6 +272,7 @@ function abrirModalPagamento() {
 
 function processarPagamento(metodo) {
     document.getElementById("modal-escolha-pagamento").style.display = "none";
+    
     document.getElementById("modal-pix").style.display = "flex";
     document.getElementById("modal-pix").innerHTML = `<div class="modal-content" style="padding:40px; text-align:center;"><h2 style="color:var(--yellow);">Conectando ao sistema...</h2></div>`;
 
@@ -290,7 +295,7 @@ function processarPagamento(metodo) {
                 <div class="modal-content" style="padding: 40px; text-align: center; border-color: var(--green);">
                     <h2 style="color: var(--green); font-size: 2rem;">Pague com PIX</h2>
                     <img src="data:image/jpeg;base64,${data.qr_code_base64}" style="width: 250px; height: 250px; margin: 20px auto; background: white; padding: 10px; border-radius: 10px;">
-                    <p style="color: var(--yellow); font-weight: bold; font-size: 1.2rem; animation: piscar 1.5s infinite;">⏳ Aguardando pagamento...</p>
+                    <p style="color: var(--yellow); font-weight: bold; font-size: 1.2rem; animation: piscar 1.5s infinite;">⏳ Aguardando pagamento no telemóvel...</p>
                     <button onclick="window.location.reload()" class="btn-cancelar" style="margin-top: 20px;">Cancelar Pedido</button>
                 </div>
             `;
@@ -299,7 +304,7 @@ function processarPagamento(metodo) {
             document.getElementById("modal-pix").innerHTML = `
                 <div class="modal-content" style="padding: 40px; text-align: center; border-color: var(--yellow);">
                     <h2 style="color: var(--yellow); font-size: 2rem;">Siga as instruções na Máquina</h2>
-                    <p style="font-size: 1.2rem; margin-top: 15px; color: #ccc;">Aproxime ou insira o seu cartão.</p>
+                    <p style="font-size: 1.2rem; margin-top: 15px; color: #ccc;">Aproxime ou insira o seu cartão na máquina ao lado.</p>
                     <button onclick="window.location.reload()" class="btn-cancelar" style="margin-top: 30px;">Cancelar Pedido</button>
                 </div>
             `;
@@ -325,7 +330,7 @@ function checarStatusPagamento() {
             document.getElementById("modal-pix").innerHTML = `
                 <div class="modal-content" style="padding: 50px; text-align: center; border-color: var(--green);">
                     <h2 style="color: var(--green); font-size: 3rem;">✅ Pagamento Aprovado!</h2>
-                    <p style="font-size:1.5rem; margin-top: 20px;">O seu pedido já está a ser preparado.</p>
+                    <p style="font-size:1.5rem; margin-top: 20px;">O seu pedido já está a ser preparado no Boteco do MK.</p>
                 </div>
             `;
             setTimeout(() => window.location.reload(), 5000);
