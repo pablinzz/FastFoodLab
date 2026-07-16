@@ -10,15 +10,31 @@ router = APIRouter(prefix="/produtos", tags=["Produtos"])
 class ProdutoCreate(BaseModel):
     nome: str
     preco: float
-    categoria: Optional[str] = "Geral"
+    categoria: Optional[str] = None
     imagem_url: Optional[str] = None
-    ingredientes_disponiveis: Optional[List[Dict[str, Any]]] = []
+    ingredientes_disponiveis: Optional[List[Dict[str, Any]]] = None
+
+class ProdutoUpdate(BaseModel):
+    nome: str
+    preco: float
+    categoria: Optional[str] = None
+    imagem_url: Optional[str] = None
+    ingredientes_disponiveis: Optional[List[Dict[str, Any]]] = None
 
 @router.get("")
 @router.get("/")
 def listar_produtos(db: Session = Depends(get_db)):
     produtos = db.query(Produto).filter(Produto.ativo == True).all()
-    return produtos
+    return [
+        {
+            "id": p.id, 
+            "nome": p.nome, 
+            "preco": p.preco, 
+            "categoria": p.categoria, 
+            "imagem_url": p.imagem_url,
+            "ingredientes_disponiveis": p.ingredientes_disponiveis
+        } for p in produtos
+    ]
 
 @router.post("")
 @router.post("/")
@@ -35,22 +51,21 @@ def criar_produto(produto: ProdutoCreate, db: Session = Depends(get_db)):
     db.refresh(novo_produto)
     return novo_produto
 
-# --- ESTA ERA A ROTA QUE FALTAVA PARA A EDIÇÃO FUNCIONAR ---
 @router.put("/{produto_id}")
-def atualizar_produto(produto_id: int, produto: ProdutoCreate, db: Session = Depends(get_db)):
-    prod_db = db.query(Produto).filter(Produto.id == produto_id).first()
-    if not prod_db:
+def atualizar_produto(produto_id: int, produto: ProdutoUpdate, db: Session = Depends(get_db)):
+    db_produto = db.query(Produto).filter(Produto.id == produto_id).first()
+    if not db_produto:
         raise HTTPException(status_code=404, detail="Produto não encontrado")
     
-    prod_db.nome = produto.nome
-    prod_db.preco = produto.preco
-    prod_db.categoria = produto.categoria
-    prod_db.imagem_url = produto.imagem_url
-    prod_db.ingredientes_disponiveis = produto.ingredientes_disponiveis
+    db_produto.nome = produto.nome
+    db_produto.preco = produto.preco
+    db_produto.categoria = produto.categoria
+    db_produto.imagem_url = produto.imagem_url
+    db_produto.ingredientes_disponiveis = produto.ingredientes_disponiveis
     
     db.commit()
-    db.refresh(prod_db)
-    return prod_db
+    db.refresh(db_produto)
+    return db_produto
 
 @router.delete("/{produto_id}")
 def deletar_produto(produto_id: int, db: Session = Depends(get_db)):
@@ -58,7 +73,6 @@ def deletar_produto(produto_id: int, db: Session = Depends(get_db)):
     if not produto:
         raise HTTPException(status_code=404, detail="Produto não encontrado")
     
-    # "Soft Delete": Fica oculto para não apagar o histórico de vendas
     produto.ativo = False
     db.commit()
     return {"mensagem": "Produto removido com sucesso"}

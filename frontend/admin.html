@@ -32,6 +32,7 @@
             padding-bottom: 20px;
         }
         
+        .header img { height: 60px; margin-right: 20px; object-fit: contain; }
         .header h1 { color: var(--yellow); font-weight: 800; font-size: 2.5rem; margin: 0; }
 
         .dashboard-container {
@@ -75,6 +76,13 @@
             cursor: pointer; margin-top: 30px; transition: 0.2s;
         }
         .btn-salvar:active { transform: scale(0.98); }
+        
+        .btn-cancelar-edicao {
+            width: 100%; background: #333; color: white; padding: 15px; 
+            border: none; border-radius: 12px; font-size: 1.1rem; font-weight: bold; 
+            cursor: pointer; margin-top: 15px; transition: 0.2s; display: none;
+        }
+        .btn-cancelar-edicao:hover { background: #444; }
 
         /* LADO DIREITO: LISTA DE PRODUTOS */
         .list-section {
@@ -112,15 +120,17 @@
         .produto-categoria { font-size: 0.9rem; color: var(--text-muted); background: #333; padding: 2px 8px; border-radius: 10px; display: inline-block; margin-top: 5px;}
         .produto-preco { font-size: 1.2rem; font-weight: bold; color: var(--green); margin-top: 5px; }
 
+        .acoes-card { display: flex; flex-direction: column; gap: 8px; }
+
+        .btn-editar-produto {
+            background: var(--yellow); color: #000; border: none; border-radius: 8px;
+            padding: 8px 12px; cursor: pointer; font-weight: bold; transition: 0.2s;
+        }
+        .btn-editar-produto:hover { background: #d4ac0d; }
+
         .btn-apagar-produto {
-            background: var(--danger);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 10px 15px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.2s;
+            background: var(--danger); color: white; border: none; border-radius: 8px;
+            padding: 8px 12px; cursor: pointer; font-weight: bold; transition: 0.2s;
         }
         .btn-apagar-produto:hover { background: #c0392b; }
 
@@ -134,14 +144,16 @@
 <body>
 
     <div class="header">
-        <h1>⚙️ Boteco do MK - Painel Admin</h1>
+        <img src="logo.png" alt="Logo Boteco do MK" onerror="this.style.display='none'">
+        <h1>Boteco do MK - Painel Admin</h1>
     </div>
 
     <div class="dashboard-container">
-        <!-- FORMULÁRIO DE CADASTRO -->
         <div class="form-section">
-            <h2>➕ Cadastrar Novo Produto</h2>
+            <h2 id="titulo-form">➕ Cadastrar Novo Produto</h2>
             <form id="produto-form">
+                <input type="hidden" id="produto_id">
+
                 <label>Nome do Produto:</label>
                 <input type="text" id="nome" required placeholder="Ex: Hambúrguer Duplo MK">
 
@@ -166,11 +178,11 @@
                     <button type="button" class="btn-adicionar-ing" onclick="adicionarLinhaIngrediente()">+ ADICIONAR INGREDIENTE EXTRA</button>
                 </div>
 
-                <button type="submit" class="btn-salvar">CADASTRAR PRODUTO</button>
+                <button type="submit" class="btn-salvar" id="btn-salvar">CADASTRAR PRODUTO</button>
+                <button type="button" class="btn-cancelar-edicao" id="btn-cancelar-edicao" onclick="cancelarEdicao()">Cancelar Edição</button>
             </form>
         </div>
 
-        <!-- LISTA DE PRODUTOS -->
         <div class="list-section">
             <h2>📋 Produtos no Cardápio</h2>
             <div id="produtos-lista" class="produtos-lista">
@@ -181,29 +193,26 @@
 
     <script>
         const API_URL = "https://fastfoodlab.onrender.com";
-        let produtosAdmin = [];
-        let produtoEditandoId = null;
+        let todosProdutos = [];
 
-        // --- GESTÃO DE INGREDIENTES NO FORMULÁRIO ---
         function adicionarLinhaIngrediente(nome = "", preco = "") {
             const container = document.getElementById("lista-ingredientes");
             const row = document.createElement("div");
             row.className = "ingrediente-row";
             row.innerHTML = `
-                <input type="text" placeholder="Ex: Bacon Extra" class="ing-nome" style="flex: 2;" required value="${nome}">
-                <input type="number" step="0.01" placeholder="R$ 0,00" class="ing-preco" style="flex: 1;" required value="${preco}">
+                <input type="text" placeholder="Ex: Bacon Extra" class="ing-nome" style="flex: 2;" value="${nome}" required>
+                <input type="number" step="0.01" placeholder="R$ 0,00" class="ing-preco" style="flex: 1;" value="${preco}" required>
                 <button type="button" class="btn-remover-ing" onclick="this.parentElement.remove()">X</button>
             `;
             container.appendChild(row);
         }
 
-        // --- CADASTRAR OU EDITAR PRODUTO ---
         document.getElementById("produto-form").onsubmit = async (e) => {
             e.preventDefault();
-            const btn = document.getElementById("btn-salvar-form");
-            btn.innerText = "Salvando...";
+            const btn = document.getElementById("btn-salvar");
             btn.disabled = true;
 
+            const produtoId = document.getElementById("produto_id").value;
             const nomes = document.querySelectorAll(".ing-nome");
             const precos = document.querySelectorAll(".ing-preco");
             const ingredientes = [];
@@ -222,102 +231,48 @@
                 preco: parseFloat(document.getElementById("preco").value),
                 categoria: document.getElementById("categoria").value,
                 imagem_url: document.getElementById("imagem_url").value || null,
-                ingredientes_disponiveis: ingredientes
+                ingredientes_disponiveis: ingredientes.length > 0 ? ingredientes : null
             };
 
+            const isEditando = produtoId !== "";
+            const url = isEditando ? `${API_URL}/produtos/${produtoId}` : `${API_URL}/produtos/`;
+            const metodo = isEditando ? "PUT" : "POST";
+
             try {
-                let response;
-                if (produtoEditandoId) {
-                    // MODO EDIÇÃO (PUT)
-                    response = await fetch(`${API_URL}/produtos/${produtoEditandoId}`, {
-                        method: "PUT",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(dados)
-                    });
-                } else {
-                    // MODO CRIAÇÃO (POST)
-                    response = await fetch(`${API_URL}/produtos/`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(dados)
-                    });
-                }
+                const response = await fetch(url, {
+                    method: metodo,
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dados)
+                });
 
                 if (response.ok) {
-                    alert(produtoEditandoId ? "✅ Produto atualizado com sucesso!" : "✅ Produto cadastrado com sucesso!");
-                    cancelarEdicao(); // Reseta o form para o modo normal
-                    carregarListaProdutos(); // Atualiza a lista da direita
+                    alert(isEditando ? "✅ Produto atualizado com sucesso!" : "✅ Produto cadastrado com sucesso!");
+                    cancelarEdicao(); 
+                    carregarListaProdutos(); 
                 } else {
                     alert("❌ Erro ao salvar o produto.");
                 }
             } catch (err) {
-                alert("Erro de conexão com a API.");
+                alert("Erro de conexão com o Render.");
             } finally {
-                btn.innerText = produtoEditandoId ? "💾 ATUALIZAR PRODUTO" : "CADASTRAR PRODUTO";
                 btn.disabled = false;
             }
         };
 
-        // --- PREPARAR PARA EDITAR UM ITEM ---
-        function editarProduto(id) {
-            const prod = produtosAdmin.find(p => p.id === id);
-            if (!prod) return;
-
-            // Preenche a esquerda com os dados da direita
-            produtoEditandoId = prod.id;
-            document.getElementById("nome").value = prod.nome;
-            document.getElementById("preco").value = prod.preco;
-            document.getElementById("categoria").value = prod.categoria || "Lanches";
-            document.getElementById("imagem_url").value = prod.imagem_url || "";
-
-            document.getElementById("lista-ingredientes").innerHTML = "";
-            if (prod.ingredientes_disponiveis) {
-                prod.ingredientes_disponiveis.forEach(ing => {
-                    adicionarLinhaIngrediente(ing.nome, ing.preco);
-                });
-            }
-
-            // Altera o visual do formulário para modo Edição
-            document.getElementById("titulo-formulario").innerText = "✏️ Editando Produto";
-            const btnSalvar = document.getElementById("btn-salvar-form");
-            btnSalvar.innerText = "💾 ATUALIZAR PRODUTO";
-            btnSalvar.style.background = "var(--yellow)";
-            document.getElementById("btn-cancelar-edicao").style.display = "block";
-            
-            // Faz scroll para o topo caso esteja a editar no telemóvel
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // --- CANCELAR MODO EDIÇÃO ---
-        function cancelarEdicao() {
-            produtoEditandoId = null;
-            document.getElementById("produto-form").reset();
-            document.getElementById("lista-ingredientes").innerHTML = "";
-            
-            // Devolve o visual do formulário ao normal
-            document.getElementById("titulo-formulario").innerText = "➕ Cadastrar Novo Produto";
-            const btnSalvar = document.getElementById("btn-salvar-form");
-            btnSalvar.innerText = "CADASTRAR PRODUTO";
-            btnSalvar.style.background = "var(--green)";
-            document.getElementById("btn-cancelar-edicao").style.display = "none";
-        }
-
-        // --- CARREGAR LISTA DE PRODUTOS ---
         async function carregarListaProdutos() {
             const container = document.getElementById("produtos-lista");
             try {
                 const response = await fetch(`${API_URL}/produtos/`);
-                const produtos = await response.json();
+                todosProdutos = await response.json();
 
-                produtosAdmin = produtos; // Salva na memória global para podermos editar
                 container.innerHTML = "";
 
-                if (produtos.length === 0) {
+                if (todosProdutos.length === 0) {
                     container.innerHTML = "<p style='color: #666;'>Nenhum produto cadastrado.</p>";
                     return;
                 }
 
-                produtos.forEach(prod => {
+                todosProdutos.forEach(prod => {
                     const imgSrc = prod.imagem_url || 'https://via.placeholder.com/60/222222/555555?text=Sem+Foto';
                     
                     const card = document.createElement("div");
@@ -329,13 +284,9 @@
                             <div class="produto-categoria">${prod.categoria || 'Geral'}</div>
                             <div class="produto-preco">R$ ${prod.preco.toFixed(2)}</div>
                         </div>
-                        <div style="display: flex; flex-direction: column; gap: 8px;">
-                            <button class="btn-editar-produto" onclick="editarProduto(${prod.id})">
-                                ✏️ Editar
-                            </button>
-                            <button class="btn-apagar-produto" onclick="apagarProduto(${prod.id}, '${prod.nome}')">
-                                🗑️ Apagar
-                            </button>
+                        <div class="acoes-card">
+                            <button class="btn-editar-produto" onclick="prepararEdicao(${prod.id})">✏️ Editar</button>
+                            <button class="btn-apagar-produto" onclick="apagarProduto(${prod.id}, '${prod.nome}')">🗑️ Apagar</button>
                         </div>
                     `;
                     container.appendChild(card);
@@ -345,7 +296,37 @@
             }
         }
 
-        // --- APAGAR PRODUTO ---
+        function prepararEdicao(id) {
+            const produto = todosProdutos.find(p => p.id === id);
+            if (!produto) return;
+
+            document.getElementById("titulo-form").innerText = "✏️ Editar Produto";
+            document.getElementById("btn-salvar").innerText = "ATUALIZAR PRODUTO";
+            document.getElementById("btn-cancelar-edicao").style.display = "block";
+            
+            document.getElementById("produto_id").value = produto.id;
+            document.getElementById("nome").value = produto.nome;
+            document.getElementById("preco").value = produto.preco;
+            document.getElementById("categoria").value = produto.categoria || "Lanches";
+            document.getElementById("imagem_url").value = produto.imagem_url || "";
+
+            document.getElementById("lista-ingredientes").innerHTML = "";
+            if (produto.ingredientes_disponiveis && produto.ingredientes_disponiveis.length > 0) {
+                produto.ingredientes_disponiveis.forEach(ing => {
+                    adicionarLinhaIngrediente(ing.nome, ing.preco);
+                });
+            }
+        }
+
+        function cancelarEdicao() {
+            document.getElementById("produto-form").reset();
+            document.getElementById("produto_id").value = "";
+            document.getElementById("lista-ingredientes").innerHTML = "";
+            document.getElementById("titulo-form").innerText = "➕ Cadastrar Novo Produto";
+            document.getElementById("btn-salvar").innerText = "CADASTRAR PRODUTO";
+            document.getElementById("btn-cancelar-edicao").style.display = "none";
+        }
+
         async function apagarProduto(id, nome) {
             if (!confirm(`Tem a certeza que deseja APAGAR o produto "${nome}"?`)) return;
 
@@ -355,8 +336,7 @@
                 });
 
                 if (response.ok) {
-                    if(produtoEditandoId === id) cancelarEdicao(); // Se apagar o que estava a editar, cancela
-                    carregarListaProdutos();
+                    carregarListaProdutos(); 
                 } else {
                     alert("Erro ao apagar o produto.");
                 }
@@ -365,7 +345,6 @@
             }
         }
 
-        // Inicia carregando a lista ao abrir a página
         window.onload = carregarListaProdutos;
     </script>
 </body>
