@@ -11,8 +11,9 @@ class StatusUpdate(BaseModel):
 
 @router.get("/pedidos")
 def listar_pedidos_cozinha(db: Session = Depends(get_db)):
-    # Busca apenas pedidos que foram PAGOS ou estão a ser PREPARADOS
-    pedidos = db.query(Pedido).filter(Pedido.status.in_(["PAGO", "PREPARANDO"])).order_by(Pedido.id.asc()).all()
+    # AGORA BUSCA PEDIDOS PENDENTES E PAGOS
+    status_permitidos = ["AGUARDANDO_PAGAMENTO", "PAGAR_NO_CAIXA", "PAGO", "PREPARANDO"]
+    pedidos = db.query(Pedido).filter(Pedido.status.in_(status_permitidos)).order_by(Pedido.id.asc()).all()
     
     resultado = []
     for p in pedidos:
