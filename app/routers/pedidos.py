@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
 from app.database import get_db
 from app.models import Pedido, ItemPedido
@@ -13,12 +13,13 @@ class ItemCarrinho(BaseModel):
     id: int
     nome: str
     preco: float
-    observacoes: str | None = ""
     uniqueId: float
+    observacoes: Optional[str] = ""
+    quantidade: int = 1  # <-- NOVO CAMPO DE QUANTIDADE
 
 class PedidoRequest(BaseModel):
     itens: List[ItemCarrinho]
-    metodo_pagamento: str  # Novo campo: "PIX", "DEBITO", "CREDITO", ou "DINHEIRO"
+    metodo_pagamento: str
     nome_cliente: str = "Cliente"
     tipo_consumo: str = "AQUI"
 
@@ -27,9 +28,9 @@ def finalizar_pedido(req: PedidoRequest, db: Session = Depends(get_db)):
     if not req.itens:
         raise HTTPException(status_code=400, detail="Carrinho vazio")
 
-    total = sum(item.preco for item in req.itens)
+    # Calcula o total multiplicando o preço pela quantidade escolhida
+    total = sum(item.preco * item.quantidade for item in req.itens)
 
-    # Cria o pedido no banco de dados com base na forma de pagamento
     if req.metodo_pagamento == "DINHEIRO":
         status_inicial = "PAGAR_NO_CAIXA"
     else:
@@ -45,10 +46,14 @@ def finalizar_pedido(req: PedidoRequest, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(pedido)
 
-    # Salva os itens do pedido
+    # Salva os itens do pedido com a quantidade e as observações (extras)
     for item in req.itens:
         item_pedido = ItemPedido(
-            pedido_id=pedido.id, produto_id=item.id, quantidade=1, preco_unitario=item.preco
+            pedido_id=pedido.id, 
+            produto_id=item.id, 
+            quantidade=item.quantidade, 
+            preco_unitario=item.preco,
+            observacoes=item.observacoes
         )
         db.add(item_pedido)
     db.commit()
@@ -63,16 +68,11 @@ def finalizar_pedido(req: PedidoRequest, db: Session = Depends(get_db)):
             raise HTTPException(status_code=500, detail="Erro ao gerar PIX")
 
     elif req.metodo_pagamento in ["DEBITO", "CREDITO"]:
-        # AQUI ENTRA A INTEGRAÇÃO COM A MAQUININHA FÍSICA NO FUTURO
-        # Ex: Acordar a maquininha do Mercado Pago Point via API.
-        # Por enquanto, retornamos para o Totem ficar aguardando o pagamento.
         return {"pedido_id": pedido.id, "acao": "AGUARDANDO_MAQUININHA"}
 
     elif req.metodo_pagamento == "DINHEIRO":
-        # Finaliza na hora e manda o cliente para o caixa
         return {"pedido_id": pedido.id, "acao": "IR_PARA_CAIXA"}
 
-# Rota para checar status continua igual
 @router.get("/{pedido_id}/status")
 def checar_status(pedido_id: int, db: Session = Depends(get_db)):
     pedido = db.query(Pedido).filter(Pedido.id == pedido_id).first()

@@ -134,3 +134,36 @@ body {
     z-index: 3000; cursor: pointer;
 }
 .splash-content { text-align: center; }
+
+/* --- CONTROLOS DE QUANTIDADE NO CARRINHO --- */
+.controles-quantidade {
+display: flex;
+align-items: center;
+background: #222;
+border-radius: 8px;
+overflow: hidden;
+margin-left: 15px;
+border: 1px solid var(--border);
+}
+.btn-qtd {
+background: transparent;
+color: var(--yellow);
+border: none;
+width: 35px;
+height: 35px;
+font-size: 1.5rem;
+font-weight: bold;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: 0.2s;
+}
+.btn-qtd:hover { background: #333; }
+.qtd-numero {
+width: 30px;
+text-align: center;
+font-weight: bold;
+font-size: 1.1rem;
+color: white;
+}
