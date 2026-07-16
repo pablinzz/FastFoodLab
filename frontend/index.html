@@ -109,6 +109,34 @@
     </div>
 </div>
 
+<!-- TELA DE BOAS-VINDAS (SPLASH SCREEN) -->
+<div id="splash-screen" class="splash-screen" onclick="iniciarAtendimento()">
+    <div class="splash-content">
+        <h1 style="color: var(--yellow); font-size: 4.5rem; font-weight: 900; margin-bottom: 20px;">🍻 Boteco do MK</h1>
+        <p style="font-size: 2.2rem; color: white; animation: piscar 1.5s infinite;">Toque no ecrã para iniciar</p>
+    </div>
+</div>
+
+<!-- MODAL DE IDENTIFICAÇÃO DO CLIENTE -->
+<div id="modal-identificacao" class="modal-overlay" style="display: none; z-index: 2500;">
+    <div class="modal-content" style="max-width: 600px; padding: 40px; text-align: center; border-color: var(--yellow);">
+        <h2 style="color: var(--yellow); font-size: 2.2rem; margin-bottom: 20px;">Como se chama?</h2>
+        <input type="text" id="nome-cliente" placeholder="Digite o seu nome" autocomplete="off" style="width: 100%; padding: 18px; font-size: 1.6rem; border-radius: 12px; border: 2px solid var(--border); background: #111; color: white; margin-bottom: 30px; text-align: center; outline: none;">
+        
+        <h2 style="color: white; font-size: 1.8rem; margin-bottom: 20px;">Onde vai comer?</h2>
+        <div style="display: flex; gap: 20px; justify-content: center;">
+            <button class="btn-pagamento" style="flex: 1; padding: 25px;" onclick="confirmarIdentificacao('AQUI')">
+                <span style="font-size: 3rem; margin-bottom: 10px; display: block;">🍽️</span>
+                <strong>Para Comer Aqui</strong>
+            </button>
+            <button class="btn-pagamento" style="flex: 1; padding: 25px;" onclick="confirmarIdentificacao('LEVAR')">
+                <span style="font-size: 3rem; margin-bottom: 10px; display: block;">🛍️</span>
+                <strong>Para Levar</strong>
+            </button>
+        </div>
+    </div>
+</div>
+
 <script src="./app.js"></script>
 </body>
 </html>

@@ -19,6 +19,8 @@ class ItemCarrinho(BaseModel):
 class PedidoRequest(BaseModel):
     itens: List[ItemCarrinho]
     metodo_pagamento: str  # Novo campo: "PIX", "DEBITO", "CREDITO", ou "DINHEIRO"
+    nome_cliente: str = "Cliente"
+    tipo_consumo: str = "AQUI"
 
 @router.post("/finalizar")
 def finalizar_pedido(req: PedidoRequest, db: Session = Depends(get_db)):
@@ -33,7 +35,12 @@ def finalizar_pedido(req: PedidoRequest, db: Session = Depends(get_db)):
     else:
         status_inicial = "AGUARDANDO_PAGAMENTO"
 
-    pedido = Pedido(total=total, status=status_inicial)
+    pedido = Pedido(
+        total=total, 
+        status=status_inicial,
+        nome_cliente=req.nome_cliente,
+        tipo_consumo=req.tipo_consumo
+    )
     db.add(pedido)
     db.commit()
     db.refresh(pedido)

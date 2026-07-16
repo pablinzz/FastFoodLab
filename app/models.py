@@ -18,6 +18,8 @@ class Pedido(Base):
     id = Column(Integer, primary_key=True, index=True)
     total = Column(Float)
     status = Column(String, default="CRIADO")
+    nome_cliente = Column(String, nullable=True)
+    tipo_consumo = Column(String, nullable=True)
 
 class ItemPedido(Base):
     __tablename__ = "itens_pedido"

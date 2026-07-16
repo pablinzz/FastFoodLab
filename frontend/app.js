@@ -8,6 +8,30 @@ let extrasEscolhidos = [];
 let pedidoAtualId = null;
 let intervaloChecagem = null;
 
+// Novas variáveis para identificação
+let clienteNome = "";
+let clienteConsumo = "";
+
+// --- LÓGICA DA TELA DE BOAS-VINDAS ---
+function iniciarAtendimento() {
+    document.getElementById("splash-screen").style.display = "none";
+    document.getElementById("modal-identificacao").style.display = "flex";
+    setTimeout(() => document.getElementById("nome-cliente").focus(), 100);
+}
+
+function confirmarIdentificacao(tipoConsumo) {
+    const nomeInput = document.getElementById("nome-cliente").value.trim();
+    if (!nomeInput) {
+        alert("Por favor, diga-nos o seu nome para o podermos chamar quando o pedido estiver pronto!");
+        return;
+    }
+    
+    clienteNome = nomeInput;
+    clienteConsumo = tipoConsumo;
+    
+    document.getElementById("modal-identificacao").style.display = "none";
+}
+
 // --- 1. CARREGAR PRODUTOS ---
 async function carregarProdutos() {
     try {
@@ -200,7 +224,12 @@ function processarPagamento(metodo) {
     fetch(`${API_URL}/pedido/finalizar`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ itens: carrinho, metodo_pagamento: metodo })
+        body: JSON.stringify({ 
+            itens: carrinho, 
+            metodo_pagamento: metodo,
+            nome_cliente: clienteNome,
+            tipo_consumo: clienteConsumo
+        })
     })
     .then(res => res.json())
     .then(data => {
