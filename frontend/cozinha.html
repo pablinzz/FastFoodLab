@@ -1,55 +1,185 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Lab85 - Cozinha</title>
-  <style>
-      body { background: #0d0d0d; color: white; font-family: 'Nunito', sans-serif; padding: 20px; }
-      h1 { color: #FF5E00; border-bottom: 2px solid #222; padding-bottom: 10px; margin-bottom: 20px; }
-      .grid-pedidos { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-      .pedido-card { background: #222; border-left: 5px solid #FF5E00; padding: 20px; border-radius: 10px; }
-      .pedido-card h3 { font-size: 1.8rem; margin-bottom: 15px; }
-      .pedido-card ul { list-style: none; padding: 0; font-size: 1.3rem; margin-bottom: 20px; }
-      .pedido-card li { margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 5px; }
-      .btn-pronto { width: 100%; background: #4CAF50; color: white; border: none; padding: 15px; border-radius: 8px; font-size: 1.2rem; font-weight: bold; cursor: pointer; }
-  </style>
-  <script>
-    const API_URL = "https://fastfoodlab.onrender.com";
-    let quantidadeAntiga = 0;
+    <meta charset="UTF-8">
+    <title>Boteco do MK - Ecrã da Cozinha</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0a0a;
+            --surface: #1a1a1a;
+            --border: #2a2a2a;
+            --green: #2ecc71;
+            --yellow: #f1c40f;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+        }
 
-    async function carregarPedidos() {
-      const res = await fetch(`${API_URL}/cozinha/pedidos`);
-      const pedidos = await res.json();
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Nunito', sans-serif; }
+        
+        body { background-color: var(--bg-dark); color: var(--text-main); padding: 30px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-      // Aviso sonoro se cair pedido novo
-      if(pedidos.length > quantidadeAntiga && quantidadeAntiga !== 0) {
-          // Você pode colocar um arquivo de audio curto na pasta frontend
-          // new Audio('./campainha.mp3').play(); 
-      }
-      quantidadeAntiga = pedidos.length;
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid var(--border); padding-bottom: 20px; }
+        .header h1 { color: var(--yellow); font-weight: 900; font-size: 2.5rem; }
+        .clock { font-size: 1.5rem; color: var(--text-muted); font-weight: bold; }
 
-      const div = document.getElementById("grid");
-      div.innerHTML = "";
+        .grid-pedidos {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            overflow-y: auto;
+            flex: 1;
+            padding-right: 10px;
+        }
 
-      pedidos.forEach(p => {
-        let html = `<div class="pedido-card"><h3>Pedido #${p.id}</h3><ul>`;
-        p.itens.forEach(i => { html += `<li><strong>${i.quantidade}x</strong> ${i.produto.nome}</li>`; });
-        html += `</ul><button class="btn-pronto" onclick="atualizar(${p.id}, 'PRONTO')">MARCAR COMO PRONTO</button></div>`;
-        div.innerHTML += html;
-      });
-    }
+        .pedido-card {
+            background: var(--surface);
+            border-radius: 16px;
+            border: 2px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            animation: fadeIn 0.5s ease-in-out;
+        }
 
-    async function atualizar(id, status) {
-      await fetch(`${API_URL}/cozinha/pedido/${id}/status?status=${status}`, { method: "PUT" });
-      carregarPedidos();
-    }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    setInterval(carregarPedidos, 3000);
-    window.onload = carregarPedidos;
-  </script>
+        .pedido-header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .pedido-header h2 { font-size: 1.8rem; color: #000; margin: 0; font-weight: 900; }
+        .badge-consumo { background: rgba(0,0,0,0.2); padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 1rem; color: #000; }
+
+        /* Cores do Cabeçalho consoante o Estado */
+        .status-PAGO .pedido-header { background: var(--yellow); }
+        .status-PREPARANDO .pedido-header { background: var(--green); }
+        .status-PAGO { border-color: var(--yellow); }
+        .status-PREPARANDO { border-color: var(--green); }
+
+        .pedido-body { padding: 20px; flex: 1; }
+        .cliente-nome { font-size: 1.3rem; font-weight: 700; border-bottom: 1px dashed var(--border); padding-bottom: 10px; margin-bottom: 15px; color: #ddd; }
+        
+        .item-lista { list-style: none; margin-bottom: 15px; }
+        .item-nome { font-size: 1.4rem; font-weight: 800; display: flex; align-items: flex-start; gap: 10px; }
+        .item-qtd { background: #333; color: white; padding: 2px 10px; border-radius: 8px; font-size: 1.1rem; }
+        .item-obs { color: var(--yellow); font-weight: bold; font-size: 1.1rem; margin-left: 45px; margin-top: 5px; display: block; background: rgba(241, 196, 15, 0.1); padding: 8px; border-radius: 8px; border-left: 3px solid var(--yellow); }
+
+        .pedido-footer { padding: 15px; background: #111; }
+        .btn-acao { width: 100%; padding: 18px; border: none; border-radius: 12px; font-size: 1.3rem; font-weight: 900; cursor: pointer; transition: 0.2s; color: #000; }
+        
+        .status-PAGO .btn-acao { background: var(--yellow); }
+        .status-PAGO .btn-acao:hover { background: #d4ac0d; }
+        
+        .status-PREPARANDO .btn-acao { background: var(--green); }
+        .status-PREPARANDO .btn-acao:hover { background: #27ae60; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--yellow); }
+        
+        .vazio { text-align: center; color: var(--text-muted); font-size: 1.5rem; margin-top: 50px; grid-column: 1 / -1; }
+    </style>
 </head>
 <body>
-  <h1>👨‍🍳 Tela da Cozinha (Pedidos Pagos)</h1>
-  <div id="grid" class="grid-pedidos"></div>
+
+    <div class="header">
+        <h1>👨‍🍳 Boteco do MK - Cozinha</h1>
+        <div class="clock" id="relogio">00:00:00</div>
+    </div>
+
+    <div class="grid-pedidos" id="grid-pedidos">
+        <div class="vazio">A carregar pedidos...</div>
+    </div>
+
+    <script>
+        const API_URL = "https://fastfoodlab.onrender.com";
+
+        // Relógio
+        setInterval(() => {
+            const agora = new Date();
+            document.getElementById('relogio').innerText = agora.toLocaleTimeString('pt-BR');
+        }, 1000);
+
+        async function carregarPedidos() {
+            try {
+                const response = await fetch(`${API_URL}/cozinha/pedidos`);
+                const pedidos = await response.json();
+                
+                const grid = document.getElementById('grid-pedidos');
+                grid.innerHTML = '';
+
+                if (pedidos.length === 0) {
+                    grid.innerHTML = '<div class="vazio">Nenhum pedido na fila no momento. Boas vendas! 🍻</div>';
+                    return;
+                }
+
+                pedidos.forEach(pedido => {
+                    const card = document.createElement('div');
+                    card.className = `pedido-card status-${pedido.status}`;
+
+                    // Cabeçalho
+                    let headerHtml = `
+                        <div class="pedido-header">
+                            <h2>#${pedido.id.toString().padStart(3, '0')}</h2>
+                            <span class="badge-consumo">${pedido.tipo_consumo === 'AQUI' ? '🍽️ AQUI' : '🛍️ LEVAR'}</span>
+                        </div>
+                    `;
+
+                    // Corpo (Itens e Cliente)
+                    let itensHtml = `<div class="pedido-body">`;
+                    itensHtml += `<div class="cliente-nome">👤 ${pedido.nome_cliente}</div>`;
+                    
+                    pedido.itens.forEach(item => {
+                        let obsHtml = item.observacoes ? `<span class="item-obs">⚠️ Extras: ${item.observacoes}</span>` : '';
+                        itensHtml += `
+                            <div class="item-lista">
+                                <div class="item-nome">
+                                    <span class="item-qtd">${item.quantidade}x</span>
+                                    <span>${item.nome}</span>
+                                </div>
+                                ${obsHtml}
+                            </div>
+                        `;
+                    });
+                    itensHtml += `</div>`;
+
+                    // Rodapé (Botões)
+                    let btnTexto = pedido.status === 'PAGO' ? 'COMEÇAR A PREPARAR' : 'PRONTO PARA ENTREGAR ✅';
+                    let novoStatus = pedido.status === 'PAGO' ? 'PREPARANDO' : 'FINALIZADO';
+                    
+                    let footerHtml = `
+                        <div class="pedido-footer">
+                            <button class="btn-acao" onclick="atualizarStatus(${pedido.id}, '${novoStatus}')">${btnTexto}</button>
+                        </div>
+                    `;
+
+                    card.innerHTML = headerHtml + itensHtml + footerHtml;
+                    grid.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error("Erro ao carregar os pedidos:", error);
+            }
+        }
+
+        async function atualizarStatus(pedidoId, novoStatus) {
+            try {
+                await fetch(`${API_URL}/cozinha/pedidos/${pedidoId}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: novoStatus })
+                });
+                carregarPedidos(); // Recarrega imediatamente após atualizar
+            } catch (error) {
+                alert("Erro ao atualizar o pedido.");
+            }
+        }
+
+        // Atualiza a tela automaticamente a cada 5 segundos
+        carregarPedidos();
+        setInterval(carregarPedidos, 5000);
+    </script>
 </body>
 </html>
