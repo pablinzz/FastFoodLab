@@ -1,6 +1,6 @@
 const API_URL = "https://fastfoodlab.onrender.com";
 
-let todosProdutos = []; // Memória global
+let todosProdutos = []; 
 let carrinho = [];
 let total = 0;
 let produtoSelecionado = null;
@@ -8,55 +8,66 @@ let extrasEscolhidos = [];
 let pedidoAtualId = null;
 let intervaloChecagem = null;
 
-// --- 1. CARREGAR PRODUTOS (COM CORREÇÃO DE ROTA) ---
-// A barra final (/produtos/) impede o bloqueio CORS do navegador
-fetch(`${API_URL}/produtos/`)
-    .then(res => res.json())
-    .then(produtos => {
+// --- 1. CARREGAR PRODUTOS ---
+async function carregarProdutos() {
+    try {
+        // Tenta buscar os dados no backend
+        const response = await fetch(`${API_URL}/produtos`);
+        const produtos = await response.json();
+        
         todosProdutos = produtos;
+        
+        if(produtos.length === 0) {
+            document.getElementById("product-feed").innerHTML = "<h2 style='color:#888; text-align:center; margin-top:50px;'>O cardápio está vazio. Cadastre os produtos no painel Admin.</h2>";
+            return;
+        }
+
         renderizarLayoutIfood(produtos);
-    })
-    .catch(err => {
-        console.error("Erro ao carregar produtos:", err);
-        document.getElementById("product-feed").innerHTML = "<h2 style='color:red;'>Erro ao ligar ao servidor.</h2>";
-    });
+    } catch (err) {
+        console.error("Erro de conexão:", err);
+        document.getElementById("product-feed").innerHTML = "<h2 style='color:red; text-align:center; margin-top:50px;'>Erro ao carregar o cardápio. Verifique o servidor.</h2>";
+    }
+}
+
+// Inicia a aplicação
+carregarProdutos();
 
 // --- 2. DESENHAR LAYOUT IFOOD ---
 function renderizarLayoutIfood(produtos) {
-    const nav = document.getElementById("category-nav");
+    const nav = document.getElementById("category-list");
     const feed = document.getElementById("product-feed");
     nav.innerHTML = ""; feed.innerHTML = "";
 
-    // Agrupar produtos pelas suas categorias
-    const categoriasUnicas = [...new Set(produtos.map(p => p.categoria || "Outros"))];
+    // Agrupar produtos pelas categorias (se não tiver categoria, vai para 'Geral')
+    const categoriasUnicas = [...new Set(produtos.map(p => p.categoria && p.categoria.trim() !== "" ? p.categoria : "Geral"))];
 
-    categoriasUnicas.forEach(cat => {
-        // Link na barra lateral
-        nav.innerHTML += `<a href="#cat-${cat}" class="cat-link">${cat}</a>`;
+    categoriasUnicas.forEach((cat, index) => {
+        // Gera o link na barra esquerda
+        nav.innerHTML += `<div class="cat-link" onclick="document.getElementById('cat-${index}').scrollIntoView({behavior: 'smooth'})">${cat}</div>`;
 
-        // Secção de produtos no centro
+        // Gera a seção no meio da tela
         let sectionHtml = `
-            <section id="cat-${cat}" class="categoria-section">
+            <section id="cat-${index}" class="categoria-section">
                 <h2>${cat}</h2>
                 <div class="grid-ifood">
         `;
 
-        const produtosDaCategoria = produtos.filter(p => (p.categoria || "Outros") === cat);
+        const produtosDaCategoria = produtos.filter(p => (p.categoria && p.categoria.trim() !== "" ? p.categoria : "Geral") === cat);
         
         produtosDaCategoria.forEach(prod => {
-            const imgHtml = prod.imagem_url 
-                ? `<div class="card-img-wrapper"><img src="${prod.imagem_url}" alt="${prod.nome}"></div>` 
-                : '';
-
-            // Ao clicar no cartão, abre o modal enviando o ID do produto
+            // Placeholder se não tiver imagem
+            const imgSrc = prod.imagem_url ? prod.imagem_url : 'https://via.placeholder.com/150/222222/555555?text=Sem+Foto';
+            
             sectionHtml += `
                 <div class="card-ifood" onclick="abrirModalPersonalizar(${prod.id})">
                     <div class="card-info">
                         <h3>${prod.nome}</h3>
-                        <p class="desc">Delicioso, preparado na hora para si.</p>
+                        <p class="desc">Preparado no capricho para matar a sua fome.</p>
                         <p class="preco">R$ ${prod.preco.toFixed(2)}</p>
                     </div>
-                    ${imgHtml}
+                    <div class="card-img-wrapper">
+                        <img src="${imgSrc}" alt="${prod.nome}">
+                    </div>
                 </div>
             `;
         });
@@ -66,15 +77,14 @@ function renderizarLayoutIfood(produtos) {
     });
 }
 
-// --- 3. MODAL DE PERSONALIZAÇÃO ---
+// --- 3. MODAL DE INGREDIENTES EXTRAS ---
 function abrirModalPersonalizar(produtoId) {
-    // Procura o produto correto na memória
     produtoSelecionado = todosProdutos.find(p => p.id === produtoId);
     extrasEscolhidos = []; 
 
     document.getElementById("nome-produto-modal").innerText = produtoSelecionado.nome;
-    document.getElementById("preco-base-modal").innerText = `R$ ${produtoSelecionado.preco.toFixed(2)}`;
     
+    // Mostra a imagem no topo do modal se existir
     if(produtoSelecionado.imagem_url) {
         document.getElementById("img-produto-modal").src = produtoSelecionado.imagem_url;
         document.getElementById("img-produto-modal").style.display = "block";
@@ -87,6 +97,7 @@ function abrirModalPersonalizar(produtoId) {
     const listaExtras = document.getElementById("lista-extras");
     listaExtras.innerHTML = "";
 
+    // Desenha os checkboxes se houver ingredientes configurados
     if (produtoSelecionado.ingredientes_disponiveis && produtoSelecionado.ingredientes_disponiveis.length > 0) {
         produtoSelecionado.ingredientes_disponiveis.forEach((extra, index) => {
             listaExtras.innerHTML += `
@@ -94,13 +105,13 @@ function abrirModalPersonalizar(produtoId) {
                     <input type="checkbox" id="extra-${index}" onchange="toggleExtra('${extra.nome}', ${extra.preco}, this.checked)">
                     <label for="extra-${index}" class="extra-info">
                         <span>+ ${extra.nome}</span>
-                        <span style="color:#4CAF50">R$ ${extra.preco.toFixed(2)}</span>
+                        <span style="color:var(--green)">+ R$ ${extra.preco.toFixed(2)}</span>
                     </label>
                 </div>
             `;
         });
     } else {
-        listaExtras.innerHTML = "<p style='color: #888; padding: 15px;'>Nenhum adicional disponível.</p>";
+        listaExtras.innerHTML = "<p style='color: #666; font-style: italic;'>Este produto não possui adicionais.</p>";
     }
 
     document.getElementById("modal-personalizar").style.display = "flex";
@@ -148,19 +159,23 @@ function atualizarCarrinho() {
     const lista = document.getElementById("itens-carrinho");
     lista.innerHTML = "";
 
-    carrinho.forEach(item => {
-        const obs = item.observacoes ? `<span class="item-carrinho-obs">${item.observacoes}</span>` : '';
-        lista.innerHTML += `
-            <li class="item-carrinho">
-                <div class="item-carrinho-info">
-                    <div class="item-carrinho-nome">${item.nome}</div>
-                    <div style="color: #4CAF50; font-weight: bold;">R$ ${item.preco.toFixed(2)}</div>
-                    ${obs}
-                </div>
-                <button onclick="removerDoCarrinho(${item.uniqueId}, ${item.preco})" class="btn-remover">X</button>
-            </li>
-        `;
-    });
+    if (carrinho.length === 0) {
+        lista.innerHTML = `<div style="color: #666; text-align: center; margin-top: 50px;">Seu carrinho está vazio</div>`;
+    } else {
+        carrinho.forEach(item => {
+            const obs = item.observacoes ? `<span class="item-carrinho-obs">${item.observacoes}</span>` : '';
+            lista.innerHTML += `
+                <li class="item-carrinho">
+                    <div class="item-carrinho-info">
+                        <div class="item-carrinho-nome">${item.nome}</div>
+                        <div style="color: var(--green); font-weight: bold; margin-top: 5px;">R$ ${item.preco.toFixed(2)}</div>
+                        ${obs}
+                    </div>
+                    <button onclick="removerDoCarrinho(${item.uniqueId}, ${item.preco})" class="btn-remover">X</button>
+                </li>
+            `;
+        });
+    }
     document.getElementById("total").innerText = total.toFixed(2);
 }
 
@@ -171,7 +186,7 @@ function removerDoCarrinho(uniqueId, preco) {
 }
 
 function abrirModalPagamento() {
-    if(carrinho.length === 0) return alert("Carrinho vazio!");
+    if(carrinho.length === 0) return alert("Seu carrinho está vazio!");
     document.getElementById("modal-escolha-pagamento").style.display = "flex";
 }
 
@@ -180,7 +195,7 @@ function processarPagamento(metodo) {
     
     // Mostra Carregando
     document.getElementById("modal-pix").style.display = "flex";
-    document.getElementById("modal-pix").innerHTML = `<div class="modal-content" style="padding:40px; text-align:center;"><h2 style="color:white;">Aguarde...</h2></div>`;
+    document.getElementById("modal-pix").innerHTML = `<div class="modal-content" style="padding:40px; text-align:center;"><h2 style="color:var(--yellow);">Conectando ao sistema...</h2></div>`;
 
     fetch(`${API_URL}/pedido/finalizar`, {
         method: "POST",
@@ -193,33 +208,34 @@ function processarPagamento(metodo) {
 
         if (data.acao === "MOSTRAR_QR_CODE") {
             document.getElementById("modal-pix").innerHTML = `
-                <div class="modal-content" style="padding: 40px; text-align: center;">
-                    <h2 style="color: #4CAF50; font-size: 2rem;">Pague com PIX</h2>
+                <div class="modal-content" style="padding: 40px; text-align: center; border-color: var(--green);">
+                    <h2 style="color: var(--green); font-size: 2rem;">Pague com PIX</h2>
                     <img src="data:image/jpeg;base64,${data.qr_code_base64}" style="width: 250px; height: 250px; margin: 20px auto; background: white; padding: 10px; border-radius: 10px;">
-                    <p style="color: #FF5E00; font-weight: bold; animation: piscar 1.5s infinite;">⏳ Aguardando pagamento...</p>
-                    <button onclick="location.reload()" class="btn-cancelar" style="margin-top: 20px;">Cancelar</button>
+                    <p style="color: var(--yellow); font-weight: bold; font-size: 1.2rem; animation: piscar 1.5s infinite;">⏳ Aguardando pagamento no telemóvel...</p>
+                    <button onclick="window.location.reload()" class="btn-cancelar" style="margin-top: 20px;">Cancelar Pedido</button>
                 </div>
             `;
             intervaloChecagem = setInterval(checarStatusPagamento, 3000);
         } else if (data.acao === "AGUARDANDO_MAQUININHA") {
             document.getElementById("modal-pix").innerHTML = `
-                <div class="modal-content" style="padding: 40px; text-align: center;">
-                    <h2 style="color: #2196F3;">Siga as instruções na Maquininha</h2>
-                    <p>Aproxime ou insira o seu cartão ao lado.</p>
-                    <button onclick="location.reload()" class="btn-cancelar" style="margin-top: 20px;">Cancelar</button>
+                <div class="modal-content" style="padding: 40px; text-align: center; border-color: var(--yellow);">
+                    <h2 style="color: var(--yellow); font-size: 2rem;">Siga as instruções na Máquina</h2>
+                    <p style="font-size: 1.2rem; margin-top: 15px; color: #ccc;">Aproxime ou insira o seu cartão na máquina ao lado.</p>
+                    <button onclick="window.location.reload()" class="btn-cancelar" style="margin-top: 30px;">Cancelar Pedido</button>
                 </div>
             `;
+            // Como ainda não temos integração real da máquina, podemos deixar um setTimeout fictício ou remover.
         } else {
             document.getElementById("modal-pix").innerHTML = `
-                <div class="modal-content" style="padding: 40px; text-align: center;">
-                    <h2 style="color: #8BC34A;">Pedido #${pedidoAtualId} Anotado!</h2>
-                    <p style="font-size:1.5rem; margin-top:20px;">Vá ao caixa para pagar.</p>
+                <div class="modal-content" style="padding: 40px; text-align: center; border-color: white;">
+                    <h2 style="color: white; font-size: 2.5rem;">Pedido #${pedidoAtualId} Anotado!</h2>
+                    <p style="font-size:1.5rem; margin-top:20px; color: var(--green);">Dirija-se ao caixa para pagar.</p>
                 </div>
             `;
-            setTimeout(() => location.reload(), 5000);
+            setTimeout(() => window.location.reload(), 6000);
         }
     })
-    .catch(err => { alert("Erro de rede."); location.reload(); });
+    .catch(err => { alert("Erro de rede. Tente novamente."); window.location.reload(); });
 }
 
 function checarStatusPagamento() {
@@ -229,12 +245,12 @@ function checarStatusPagamento() {
         if (data.status === "PAGO") {
             clearInterval(intervaloChecagem);
             document.getElementById("modal-pix").innerHTML = `
-                <div class="modal-content" style="padding: 40px; text-align: center;">
-                    <h2 style="color: #4CAF50; font-size: 3rem;">✅ Aprovado!</h2>
-                    <p style="font-size:1.5rem;">O seu pedido já está a ser preparado.</p>
+                <div class="modal-content" style="padding: 50px; text-align: center; border-color: var(--green);">
+                    <h2 style="color: var(--green); font-size: 3rem;">✅ Pagamento Aprovado!</h2>
+                    <p style="font-size:1.5rem; margin-top: 20px;">O seu pedido já está a ser preparado no Boteco do MK.</p>
                 </div>
             `;
-            setTimeout(() => location.reload(), 4000);
+            setTimeout(() => window.location.reload(), 5000);
         }
     });
 }
