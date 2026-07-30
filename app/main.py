@@ -1,38 +1,30 @@
-from dotenv import load_dotenv
-load_dotenv()
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.database import engine, Base
+from app.routers import produtos, pedidos, cozinha, admin, webhook, estoque
 
-from app.database import engine
-from app.models import Base
+# Cria as tabelas que faltam automaticamente
+Base.metadata.create_all(bind=engine)
 
-from app.routers import webhook, pedidos, cozinha, produtos, admin
+app = FastAPI(title="Boteco do MK API")
 
-app = FastAPI(
-    title="API Lab85",
-    version="1.0.0"
-)
-
-# --- Configuração do CORS ---
+# Configuração de CORS para permitir que o Frontend comunique com o Backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], 
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Cria as tabelas
-Base.metadata.create_all(bind=engine)
-
-@app.get("/")
-def home():
-    return {"status": "API Lab85 rodando perfeitamente!"}
-
-# --- Rotas Ativas da Aplicação ---
+# Registar todas as rotas
 app.include_router(produtos.router)
 app.include_router(pedidos.router)
-app.include_router(webhook.router)
 app.include_router(cozinha.router)
 app.include_router(admin.router)
+app.include_router(webhook.router)
+app.include_router(estoque.router) # Rota nova do inventário!
+
+@app.get("/")
+def root():
+    return {"mensagem": "API do Boteco do MK está online!"}
