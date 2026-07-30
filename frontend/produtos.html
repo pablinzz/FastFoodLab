@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Boteco do MK - Produtos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-dark: #0a0a0a; --surface: #141414; --border: #2a2a2a; --green: #2ecc71; --yellow: #f1c40f; --danger: #e74c3c; --text-main: #ffffff; --text-muted: #888888; }
+        body { font-family: 'Nunito', sans-serif; background: var(--bg-dark); color: var(--text-main); padding: 40px; margin: 0; }
+        .header { display: flex; align-items: center; margin-bottom: 40px; border-bottom: 2px solid var(--border); padding-bottom: 20px; }
+        .header img { height: 60px; margin-right: 20px; object-fit: contain; }
+        .header h1 { color: var(--yellow); font-weight: 800; font-size: 2.5rem; margin: 0; }
+        .btn-voltar { text-decoration: none; color: var(--text-muted); font-size: 1.2rem; font-weight: bold; margin-right: 30px; transition: 0.2s; }
+        .btn-voltar:hover { color: var(--yellow); }
+        .dashboard-container { display: flex; gap: 40px; align-items: flex-start; flex-wrap: wrap; }
+        .form-section { flex: 1; min-width: 300px; background: var(--surface); padding: 30px; border-radius: 20px; border: 1px solid var(--border); }
+        .form-section h2 { color: var(--green); margin-bottom: 20px; font-size: 1.8rem; }
+        label { display: block; margin-top: 15px; font-weight: bold; color: var(--text-muted); }
+        input, select { width: 100%; padding: 12px; margin-top: 5px; border-radius: 10px; border: 1px solid var(--border); background: #1e1e1e; color: white; font-size: 1.1rem; outline: none; box-sizing: border-box; }
+        input:focus, select:focus { border-color: var(--yellow); }
+        .ingredientes-section { margin-top: 30px; padding: 20px; background: #0f0f0f; border-radius: 15px; border: 1px dashed #444; }
+        .ingrediente-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+        .ingrediente-row input { margin-top: 0; }
+        .btn-remover-ing { background: var(--danger); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-adicionar-ing { background: #333; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; margin-top: 10px; font-weight: bold; width: 100%; }
+        .btn-adicionar-ing:hover { background: #444; color: var(--yellow); }
+        .btn-salvar { width: 100%; background: var(--green); color: #000; padding: 18px; border: none; border-radius: 12px; font-size: 1.3rem; font-weight: 800; cursor: pointer; margin-top: 30px; transition: 0.2s; }
+        .btn-salvar:active { transform: scale(0.98); }
+        .btn-cancelar-edicao { width: 100%; background: #333; color: white; padding: 15px; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 15px; display: none; }
+        .list-section { flex: 1.2; min-width: 300px; background: var(--surface); padding: 30px; border-radius: 20px; border: 1px solid var(--border); }
+        .list-section h2 { color: var(--yellow); margin-bottom: 20px; font-size: 1.8rem; }
+        .produtos-lista { display: flex; flex-direction: column; gap: 15px; max-height: 700px; overflow-y: auto; padding-right: 10px; }
+        .produto-card { display: flex; align-items: center; background: #1a1a1a; border: 1px solid var(--border); border-radius: 12px; padding: 15px; gap: 15px; }
+        .produto-img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; background: #222; }
+        .produto-info { flex: 1; }
+        .produto-nome { font-size: 1.2rem; font-weight: bold; color: white; }
+        .produto-categoria { font-size: 0.9rem; color: var(--text-muted); background: #333; padding: 2px 8px; border-radius: 10px; display: inline-block; margin-top: 5px;}
+        .produto-preco { font-size: 1.2rem; font-weight: bold; color: var(--green); margin-top: 5px; }
+        .acoes-card { display: flex; flex-direction: column; gap: 8px; }
+        .btn-editar-produto { background: var(--yellow); color: #000; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-weight: bold; }
+        .btn-apagar-produto { background: var(--danger); color: white; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-weight: bold; }
+        ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: var(--bg-dark); } ::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="admin.html" class="btn-voltar">⬅ Voltar ao Painel</a>
+        <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+        <h1>Gestão de Cardápio</h1>
+    </div>
+
+    <div class="dashboard-container">
+        <div class="form-section">
+            <h2 id="titulo-form">➕ Cadastrar Novo Produto</h2>
+            <form id="produto-form">
+                <input type="hidden" id="produto_id">
+                <label>Nome do Produto:</label> <input type="text" id="nome" required placeholder="Ex: Hambúrguer Duplo">
+                <label>Preço Base (R$):</label> <input type="number" id="preco" step="0.01" required placeholder="Ex: 25.90">
+                <label>Categoria:</label>
+                <select id="categoria">
+                    <option value="Lanches">Lanches</option> <option value="Porções">Porções</option>
+                    <option value="Bebidas">Bebidas</option> <option value="Sobremesas">Sobremesas</option>
+                </select>
+                <label>URL da Imagem:</label> <input type="text" id="imagem_url" placeholder="https://...foto.jpg">
+                
+                <div class="ingredientes-section">
+                    <h3 style="color: white; margin-top: 0;">Personalização (Extras)</h3>
+                    <div id="lista-ingredientes"></div>
+                    <button type="button" class="btn-adicionar-ing" onclick="adicionarLinhaIngrediente()">+ ADICIONAR EXTRA</button>
+                </div>
+
+                <button type="submit" class="btn-salvar" id="btn-salvar">CADASTRAR PRODUTO</button>
+                <button type="button" class="btn-cancelar-edicao" id="btn-cancelar-edicao" onclick="cancelarEdicao()">Cancelar Edição</button>
+            </form>
+        </div>
+
+        <div class="list-section">
+            <h2>📋 Produtos no Cardápio</h2>
+            <div id="produtos-lista" class="produtos-lista"><p style="color: #666;">Carregando...</p></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "https://fastfoodlab.onrender.com";
+        let todosProdutos = [];
+
+        function adicionarLinhaIngrediente(nome = "", preco = "") {
+            const container = document.getElementById("lista-ingredientes");
+            const row = document.createElement("div"); row.className = "ingrediente-row";
+            row.innerHTML = `<input type="text" placeholder="Ex: Bacon" class="ing-nome" style="flex: 2;" value="${nome}" required>
+                             <input type="number" step="0.01" placeholder="R$ 0,00" class="ing-preco" style="flex: 1;" value="${preco}" required>
+                             <button type="button" class="btn-remover-ing" onclick="this.parentElement.remove()">X</button>`;
+            container.appendChild(row);
+        }
+
+        document.getElementById("produto-form").onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById("btn-salvar"); btn.disabled = true;
+            const produtoId = document.getElementById("produto_id").value;
+            const nomes = document.querySelectorAll(".ing-nome");
+            const precos = document.querySelectorAll(".ing-preco");
+            const ingredientes = [];
+
+            nomes.forEach((el, i) => { if (el.value) ingredientes.push({ nome: el.value, preco: parseFloat(precos[i].value) || 0 }); });
+
+            const dados = { nome: document.getElementById("nome").value, preco: parseFloat(document.getElementById("preco").value), categoria: document.getElementById("categoria").value, imagem_url: document.getElementById("imagem_url").value || null, ingredientes_disponiveis: ingredientes.length > 0 ? ingredientes : null };
+
+            const url = produtoId !== "" ? `${API_URL}/produtos/${produtoId}` : `${API_URL}/produtos/`;
+            const metodo = produtoId !== "" ? "PUT" : "POST";
+
+            try {
+                const response = await fetch(url, { method: metodo, headers: { "Content-Type": "application/json" }, body: JSON.stringify(dados) });
+                if (response.ok) { alert("✅ Guardado com sucesso!"); cancelarEdicao(); carregarListaProdutos(); } 
+                else { alert("❌ Erro ao salvar."); }
+            } catch (err) { alert("Erro de conexão."); } finally { btn.disabled = false; }
+        };
+
+        async function carregarListaProdutos() {
+            const container = document.getElementById("produtos-lista");
+            try {
+                const response = await fetch(`${API_URL}/produtos/`);
+                todosProdutos = await response.json();
+                container.innerHTML = "";
+                if (todosProdutos.length === 0) return container.innerHTML = "<p style='color: #666;'>Nenhum produto cadastrado.</p>";
+
+                todosProdutos.forEach(prod => {
+                    const card = document.createElement("div"); card.className = "produto-card";
+                    card.innerHTML = `
+                        <img src="${prod.imagem_url || 'https://via.placeholder.com/60'}" class="produto-img">
+                        <div class="produto-info">
+                            <div class="produto-nome">${prod.nome}</div>
+                            <div class="produto-categoria">${prod.categoria || 'Geral'}</div>
+                            <div class="produto-preco">R$ ${prod.preco.toFixed(2)}</div>
+                        </div>
+                        <div class="acoes-card">
+                            <button class="btn-editar-produto" onclick="prepararEdicao(${prod.id})">✏️</button>
+                            <button class="btn-apagar-produto" onclick="apagarProduto(${prod.id}, '${prod.nome}')">🗑️</button>
+                        </div>`;
+                    container.appendChild(card);
+                });
+            } catch (err) { container.innerHTML = "<p style='color: red;'>Erro ao carregar a lista.</p>"; }
+        }
+
+        function prepararEdicao(id) {
+            const prod = todosProdutos.find(p => p.id === id); if (!prod) return;
+            document.getElementById("titulo-form").innerText = "✏️ Editar Produto";
+            document.getElementById("btn-salvar").innerText = "ATUALIZAR PRODUTO";
+            document.getElementById("btn-cancelar-edicao").style.display = "block";
+            document.getElementById("produto_id").value = prod.id;
+            document.getElementById("nome").value = prod.nome; document.getElementById("preco").value = prod.preco;
+            document.getElementById("categoria").value = prod.categoria || "Lanches"; document.getElementById("imagem_url").value = prod.imagem_url || "";
+            document.getElementById("lista-ingredientes").innerHTML = "";
+            if (prod.ingredientes_disponiveis) prod.ingredientes_disponiveis.forEach(ing => adicionarLinhaIngrediente(ing.nome, ing.preco));
+        }
+
+        function cancelarEdicao() {
+            document.getElementById("produto-form").reset(); document.getElementById("produto_id").value = "";
+            document.getElementById("lista-ingredientes").innerHTML = "";
+            document.getElementById("titulo-form").innerText = "➕ Cadastrar Novo Produto";
+            document.getElementById("btn-salvar").innerText = "CADASTRAR PRODUTO";
+            document.getElementById("btn-cancelar-edicao").style.display = "none";
+        }
+
+        async function apagarProduto(id, nome) {
+            if (!confirm(`APAGAR o produto "${nome}"?`)) return;
+            try { const response = await fetch(`${API_URL}/produtos/${id}`, { method: "DELETE" });
+                  if (response.ok) carregarListaProdutos(); else alert("Erro ao apagar."); } catch (err) { alert("Erro de conexão."); }
+        }
+        window.onload = carregarListaProdutos;
+    </script>
+</body>
+</html>

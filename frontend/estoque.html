@@ -12,15 +12,15 @@
         .btn-voltar { text-decoration: none; color: var(--text-muted); font-size: 1.2rem; font-weight: bold; margin-right: 30px; transition: 0.2s; }
         .btn-voltar:hover { color: var(--yellow); }
         
-        .dashboard-container { display: flex; gap: 40px; align-items: flex-start; }
-        .form-section { flex: 1; background: var(--surface); padding: 30px; border-radius: 20px; border: 1px solid var(--border); }
+        .dashboard-container { display: flex; gap: 40px; align-items: flex-start; flex-wrap: wrap;}
+        .form-section { flex: 1; min-width: 300px; background: var(--surface); padding: 30px; border-radius: 20px; border: 1px solid var(--border); }
         .form-section h2 { color: var(--green); margin-bottom: 20px; font-size: 1.8rem; }
         label { display: block; margin-top: 15px; font-weight: bold; color: var(--text-muted); }
-        input, select { width: 100%; padding: 12px; margin-top: 5px; border-radius: 10px; border: 1px solid var(--border); background: #1e1e1e; color: white; font-size: 1.1rem; outline: none; }
+        input, select { width: 100%; padding: 12px; margin-top: 5px; border-radius: 10px; border: 1px solid var(--border); background: #1e1e1e; color: white; font-size: 1.1rem; outline: none; box-sizing: border-box;}
         
         .btn-salvar { width: 100%; background: var(--green); color: #000; padding: 18px; border: none; border-radius: 12px; font-size: 1.3rem; font-weight: 800; cursor: pointer; margin-top: 30px; }
         
-        .list-section { flex: 1.5; background: var(--surface); padding: 30px; border-radius: 20px; border: 1px solid var(--border); }
+        .list-section { flex: 1.5; min-width: 300px; background: var(--surface); padding: 30px; border-radius: 20px; border: 1px solid var(--border); }
         .list-section h2 { color: var(--yellow); margin-bottom: 20px; font-size: 1.8rem; }
         
         .estoque-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; max-height: 700px; overflow-y: auto; padding-right: 10px; }
@@ -50,7 +50,6 @@
     </div>
 
     <div class="dashboard-container">
-        <!-- FORMULÁRIO DE CADASTRO -->
         <div class="form-section">
             <h2>➕ Cadastrar Material</h2>
             <form id="estoque-form">
@@ -81,7 +80,6 @@
             </form>
         </div>
 
-        <!-- LISTA DE ESTOQUE -->
         <div class="list-section">
             <h2>📦 Materiais em Estoque</h2>
             <div id="estoque-grid" class="estoque-grid">
