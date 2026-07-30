@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Boteco do MK - Estoque</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-dark: #0a0a0a; --surface: #141414; --border: #2a2a2a; --green: #2ecc71; --yellow: #f1c40f; --danger: #e74c3c; --text-main: #ffffff; --text-muted: #888888; }
+        body { font-family: 'Nunito', sans-serif; background: var(--bg-dark); color: var(--text-main); padding: 40px; margin: 0; }
+        .header { display: flex; align-items: center; margin-bottom: 40px; border-bottom: 2px solid var(--border); padding-bottom: 20px; }
+        .header h1 { color: var(--yellow); font-weight: 800; font-size: 2.5rem; margin: 0; }
+        .btn-voltar { text-decoration: none; color: var(--text-muted); font-size: 1.2rem; font-weight: bold; margin-right: 30px; transition: 0.2s; }
+        .btn-voltar:hover { color: var(--yellow); }
+        
+        .dashboard-container { display: flex; gap: 40px; align-items: flex-start; }
+        .form-section { flex: 1; background: var(--surface); padding: 30px; border-radius: 20px; border: 1px solid var(--border); }
+        .form-section h2 { color: var(--green); margin-bottom: 20px; font-size: 1.8rem; }
+        label { display: block; margin-top: 15px; font-weight: bold; color: var(--text-muted); }
+        input, select { width: 100%; padding: 12px; margin-top: 5px; border-radius: 10px; border: 1px solid var(--border); background: #1e1e1e; color: white; font-size: 1.1rem; outline: none; }
+        
+        .btn-salvar { width: 100%; background: var(--green); color: #000; padding: 18px; border: none; border-radius: 12px; font-size: 1.3rem; font-weight: 800; cursor: pointer; margin-top: 30px; }
+        
+        .list-section { flex: 1.5; background: var(--surface); padding: 30px; border-radius: 20px; border: 1px solid var(--border); }
+        .list-section h2 { color: var(--yellow); margin-bottom: 20px; font-size: 1.8rem; }
+        
+        .estoque-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; max-height: 700px; overflow-y: auto; padding-right: 10px; }
+        
+        .estoque-card { background: #1a1a1a; border: 1px solid var(--border); border-radius: 16px; padding: 20px; position: relative;}
+        .estoque-card h3 { font-size: 1.4rem; margin-bottom: 15px; color: white; display: flex; justify-content: space-between; align-items: center;}
+        .badge-unidade { background: #333; font-size: 0.9rem; padding: 4px 10px; border-radius: 8px; color: var(--yellow); }
+        
+        .qtd-box { background: #0f0f0f; padding: 15px; border-radius: 12px; margin-bottom: 10px; border: 1px dashed #333; display: flex; justify-content: space-between; align-items: center;}
+        .qtd-label { color: var(--text-muted); font-weight: bold; }
+        
+        .stepper { display: flex; align-items: center; background: #222; border-radius: 10px; padding: 5px;}
+        .stepper button { background: transparent; border: none; color: white; font-size: 1.5rem; width: 35px; cursor: pointer; transition: 0.2s; }
+        .stepper button:hover { color: var(--green); }
+        .stepper span { font-size: 1.2rem; font-weight: bold; width: 50px; text-align: center; }
+
+        .btn-apagar-item { position: absolute; top: -10px; right: -10px; background: var(--danger); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-weight: bold; display: none; }
+        .estoque-card:hover .btn-apagar-item { display: block; }
+        
+        ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: var(--bg-dark); } ::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="admin.html" class="btn-voltar">⬅ Voltar ao Painel</a>
+        <h1>Controle de Estoque</h1>
+    </div>
+
+    <div class="dashboard-container">
+        <!-- FORMULÁRIO DE CADASTRO -->
+        <div class="form-section">
+            <h2>➕ Cadastrar Material</h2>
+            <form id="estoque-form">
+                <label>Nome do Ingrediente/Item:</label>
+                <input type="text" id="item_nome" required placeholder="Ex: Carne de Hambúrguer">
+
+                <label>Unidade de Medida:</label>
+                <select id="unidade">
+                    <option value="Unidades">Unidades (un)</option>
+                    <option value="Kg">Quilogramas (Kg)</option>
+                    <option value="Gramas">Gramas (g)</option>
+                    <option value="Litros">Litros (L)</option>
+                    <option value="Caixas">Caixas</option>
+                </select>
+
+                <div style="display: flex; gap: 15px;">
+                    <div style="flex: 1;">
+                        <label>Estoque Geral (Fundo):</label>
+                        <input type="number" id="qtd_geral" step="0.1" required value="0">
+                    </div>
+                    <div style="flex: 1;">
+                        <label>Estoque Diário (Balcão):</label>
+                        <input type="number" id="qtd_diaria" step="0.1" required value="0">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-salvar" id="btn-salvar">REGISTAR ESTOQUE</button>
+            </form>
+        </div>
+
+        <!-- LISTA DE ESTOQUE -->
+        <div class="list-section">
+            <h2>📦 Materiais em Estoque</h2>
+            <div id="estoque-grid" class="estoque-grid">
+                <p style="color: #666;">Carregando inventário...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "https://fastfoodlab.onrender.com";
+
+        document.getElementById("estoque-form").onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById("btn-salvar"); btn.disabled = true;
+
+            const dados = {
+                item_nome: document.getElementById("item_nome").value,
+                unidade: document.getElementById("unidade").value,
+                quantidade_geral: parseFloat(document.getElementById("qtd_geral").value),
+                quantidade_diaria: parseFloat(document.getElementById("qtd_diaria").value)
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/estoque/`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(dados) });
+                if (res.ok) { document.getElementById("estoque-form").reset(); document.getElementById("qtd_geral").value = "0"; document.getElementById("qtd_diaria").value = "0"; carregarEstoque(); } 
+                else { alert("Erro ao registar estoque."); }
+            } catch (err) { alert("Erro de conexão."); } finally { btn.disabled = false; }
+        };
+
+        async function carregarEstoque() {
+            const grid = document.getElementById("estoque-grid");
+            try {
+                const response = await fetch(`${API_URL}/estoque/`);
+                const itens = await response.json();
+                grid.innerHTML = "";
+                if (itens.length === 0) return grid.innerHTML = "<p style='color: #666; grid-column: 1/-1;'>O seu estoque está vazio.</p>";
+
+                itens.forEach(item => {
+                    grid.innerHTML += `
+                        <div class="estoque-card">
+                            <button class="btn-apagar-item" onclick="apagarItem(${item.id})">X</button>
+                            <h3>${item.item_nome} <span class="badge-unidade">${item.unidade}</span></h3>
+                            
+                            <div class="qtd-box">
+                                <span class="qtd-label">Armazém / Fundo</span>
+                                <div class="stepper">
+                                    <button onclick="alterarQtd(${item.id}, 'geral', ${item.quantidade_geral}, -1)">-</button>
+                                    <span>${item.quantidade_geral}</span>
+                                    <button onclick="alterarQtd(${item.id}, 'geral', ${item.quantidade_geral}, 1)">+</button>
+                                </div>
+                            </div>
+
+                            <div class="qtd-box" style="border-color: var(--green);">
+                                <span class="qtd-label" style="color: white;">Frente / Balcão</span>
+                                <div class="stepper">
+                                    <button onclick="alterarQtd(${item.id}, 'diaria', ${item.quantidade_diaria}, -1)">-</button>
+                                    <span style="color: var(--green);">${item.quantidade_diaria}</span>
+                                    <button onclick="alterarQtd(${item.id}, 'diaria', ${item.quantidade_diaria}, 1)">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (err) { grid.innerHTML = "<p style='color: red;'>Erro ao carregar estoque.</p>"; }
+        }
+
+        async function alterarQtd(id, tipo, qtdAtual, delta) {
+            let novaQtd = qtdAtual + delta;
+            if (novaQtd < 0) novaQtd = 0; // Não permite estoque negativo
+
+            const payload = tipo === 'geral' ? { quantidade_geral: novaQtd } : { quantidade_diaria: novaQtd };
+
+            try {
+                await fetch(`${API_URL}/estoque/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+                carregarEstoque(); // Atualiza visualmente
+            } catch (err) { alert("Falha ao atualizar."); }
+        }
+
+        async function apagarItem(id) {
+            if(!confirm("Tem a certeza que quer remover este item do estoque?")) return;
+            try { await fetch(`${API_URL}/estoque/${id}`, { method: "DELETE" }); carregarEstoque(); } catch (err) {}
+        }
+
+        window.onload = carregarEstoque;
+    </script>
+</body>
+</html>
