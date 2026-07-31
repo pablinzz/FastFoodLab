@@ -10,17 +10,6 @@ let intervaloChecagem = null;
 let clienteNome = "";
 let clienteConsumo = "";
 
-// --- LÓGICA DAS ABAS RETRÁTEIS (SÓ MOBILE) ---
-function toggleCategorias() {
-    document.querySelector('.category-nav').classList.toggle('open');
-    document.getElementById('overlay-categorias').classList.toggle('active');
-}
-
-function toggleCarrinho() {
-    document.querySelector('.cart-sidebar').classList.toggle('open');
-    document.getElementById('overlay-carrinho').classList.toggle('active');
-}
-
 // --- LÓGICA DA TELA DE BOAS-VINDAS ---
 function iniciarAtendimento() {
     document.getElementById("splash-screen").style.display = "none";
@@ -39,13 +28,13 @@ function confirmarIdentificacao(tipoConsumo) {
     document.getElementById("modal-identificacao").style.display = "none";
 }
 
+// --- FUNÇÃO CORRIGIDA DE CANCELAR NO TOTEM ---
 function cancelarPedidoTotem() {
     if (carrinho.length === 0) {
         document.getElementById("splash-screen").style.display = "flex";
         clienteNome = "";
         clienteConsumo = "";
-        document.getElementById("nome-cliente").value = "";
-        if (window.innerWidth <= 850) toggleCarrinho(); // Fecha aba se tiver no mobile
+        document.getElementById("nome-cliente").value = ""; // LIMPA O TEXTO DO ECRÃ
         return;
     }
     
@@ -54,10 +43,9 @@ function cancelarPedidoTotem() {
         total = 0;
         clienteNome = "";
         clienteConsumo = "";
-        document.getElementById("nome-cliente").value = ""; 
+        document.getElementById("nome-cliente").value = ""; // LIMPA O TEXTO DO ECRÃ
         atualizarCarrinho();
         document.getElementById("splash-screen").style.display = "flex";
-        if (window.innerWidth <= 850) toggleCarrinho(); // Fecha aba no mobile
     }
 }
 
@@ -90,9 +78,7 @@ function renderizarLayoutIfood(produtos) {
     const categoriasUnicas = [...new Set(produtos.map(p => p.categoria && p.categoria.trim() !== "" ? p.categoria : "Geral"))];
 
     categoriasUnicas.forEach((cat, index) => {
-        // Ao clicar numa categoria no mobile, ela faz scroll e FECHA a aba automaticamente!
-        nav.innerHTML += `<div class="cat-link" onclick="document.getElementById('cat-${index}').scrollIntoView({behavior: 'smooth'}); if(window.innerWidth <= 850) toggleCategorias();">${cat}</div>`;
-        
+        nav.innerHTML += `<div class="cat-link" onclick="document.getElementById('cat-${index}').scrollIntoView({behavior: 'smooth'})">${cat}</div>`;
         let sectionHtml = `
             <section id="cat-${index}" class="categoria-section">
                 <h2>${cat}</h2>
@@ -182,6 +168,7 @@ function confirmarPersonalizacao() {
     let observacoes = extrasEscolhidos.map(e => `+ ${e.nome}`).join(", ");
     extrasEscolhidos.forEach(e => precoBaseComExtras += e.preco);
 
+    // Verifica se já existe um item idêntico no carrinho
     let itemExistente = carrinho.find(i => i.id === produtoSelecionado.id && i.observacoes === observacoes);
 
     if (itemExistente) {
@@ -214,11 +201,15 @@ function mostrarAnimacaoSucesso() {
     `;
     document.body.appendChild(animacao);
 
+    const cartSidebar = document.querySelector('.cart-sidebar');
+    cartSidebar.style.boxShadow = "0 0 30px var(--green)";
+    
     setTimeout(() => {
         animacao.style.opacity = "0";
         animacao.style.transition = "0.3s";
         setTimeout(() => {
             animacao.remove();
+            cartSidebar.style.boxShadow = "none";
         }, 300);
     }, 800);
 }
@@ -227,13 +218,11 @@ function mostrarAnimacaoSucesso() {
 function atualizarCarrinho() {
     const lista = document.getElementById("itens-carrinho");
     lista.innerHTML = "";
-    let qtdTotal = 0; // Para o botão flutuante
 
     if (carrinho.length === 0) {
         lista.innerHTML = `<div style="color: #666; text-align: center; margin-top: 50px;">Seu carrinho está vazio</div>`;
     } else {
         carrinho.forEach(item => {
-            qtdTotal += item.quantidade;
             const obs = item.observacoes ? `<span class="item-carrinho-obs">${item.observacoes}</span>` : '';
             const precoTotalItem = item.preco * item.quantidade;
             
@@ -244,31 +233,16 @@ function atualizarCarrinho() {
                         <div style="color: var(--green); font-weight: bold; margin-top: 5px;">R$ ${precoTotalItem.toFixed(2)}</div>
                         ${obs}
                     </div>
-                    <div class="controles-quantidade">
-                        <button class="btn-qtd" onclick="alterarQuantidade(${item.uniqueId}, -1)">-</button>
-                        <span class="qtd-numero">${item.quantidade}</span>
-                        <button class="btn-qtd" onclick="alterarQuantidade(${item.uniqueId}, 1)">+</button>
+                    <div class="qtd-controles" style="display: flex; align-items: center; background: #333; border-radius: 20px; padding: 5px;">
+                        <button style="background: transparent; color: white; border: none; font-size: 1.5rem; width: 30px; cursor: pointer;" onclick="alterarQuantidade(${item.uniqueId}, -1)">-</button>
+                        <span style="font-weight: bold; margin: 0 10px; font-size: 1.2rem;">${item.quantidade}</span>
+                        <button style="background: transparent; color: white; border: none; font-size: 1.5rem; width: 30px; cursor: pointer;" onclick="alterarQuantidade(${item.uniqueId}, 1)">+</button>
                     </div>
                 </li>
             `;
         });
     }
     document.getElementById("total").innerText = total.toFixed(2);
-    
-    // Anima o botão do carrinho flutuante (Mobile)
-    const fab = document.getElementById("fab-carrinho");
-    const spanQtd = document.getElementById("qtd-flutuante");
-    if(fab && spanQtd) {
-        spanQtd.innerText = qtdTotal;
-        if(qtdTotal > 0) {
-            fab.classList.add("ativo");
-        } else {
-            fab.classList.remove("ativo");
-            if (window.innerWidth <= 850 && document.querySelector('.cart-sidebar').classList.contains('open')) {
-                toggleCarrinho(); // Esconde a aba se o carrinho ficar vazio
-            }
-        }
-    }
 }
 
 function alterarQuantidade(uniqueId, delta) {
@@ -297,7 +271,6 @@ function removerDoCarrinho(uniqueId) {
 // --- PAGAMENTO ---
 function abrirModalPagamento() {
     if(carrinho.length === 0) return alert("Seu carrinho está vazio!");
-    if(window.innerWidth <= 850) toggleCarrinho(); // Esconde a aba para mostrar o modal
     document.getElementById("modal-escolha-pagamento").style.display = "flex";
 }
 
@@ -305,7 +278,7 @@ function processarPagamento(metodo) {
     document.getElementById("modal-escolha-pagamento").style.display = "none";
     
     document.getElementById("modal-pix").style.display = "flex";
-    document.getElementById("modal-pix").innerHTML = `<div class="modal-content" style="padding:40px; text-align:center; border-color:var(--yellow)"><h2 style="color:var(--yellow);">Conectando ao sistema...</h2></div>`;
+    document.getElementById("modal-pix").innerHTML = `<div class="modal-content" style="padding:40px; text-align:center;"><h2 style="color:var(--yellow);">Conectando ao sistema...</h2></div>`;
 
     fetch(`${API_URL}/pedido/finalizar`, {
         method: "POST",
@@ -327,7 +300,7 @@ function processarPagamento(metodo) {
                     <h2 style="color: var(--green); font-size: 2rem;">Pague com PIX</h2>
                     <img src="data:image/jpeg;base64,${data.qr_code_base64}" style="width: 250px; height: 250px; margin: 20px auto; background: white; padding: 10px; border-radius: 10px;">
                     <p style="color: var(--yellow); font-weight: bold; font-size: 1.2rem; animation: piscar 1.5s infinite;">⏳ Aguardando pagamento no telemóvel...</p>
-                    <button onclick="window.location.reload()" class="btn-cancelar-pedido" style="margin-top: 20px;">Cancelar Pedido</button>
+                    <button onclick="window.location.reload()" class="btn-cancelar" style="margin-top: 20px;">Cancelar Pedido</button>
                 </div>
             `;
             intervaloChecagem = setInterval(checarStatusPagamento, 3000);
@@ -336,7 +309,7 @@ function processarPagamento(metodo) {
                 <div class="modal-content" style="padding: 40px; text-align: center; border-color: var(--yellow);">
                     <h2 style="color: var(--yellow); font-size: 2rem;">Siga as instruções na Máquina</h2>
                     <p style="font-size: 1.2rem; margin-top: 15px; color: #ccc;">Aproxime ou insira o seu cartão na máquina ao lado.</p>
-                    <button onclick="window.location.reload()" class="btn-cancelar-pedido" style="margin-top: 30px;">Cancelar Pedido</button>
+                    <button onclick="window.location.reload()" class="btn-cancelar" style="margin-top: 30px;">Cancelar Pedido</button>
                 </div>
             `;
         } else {
