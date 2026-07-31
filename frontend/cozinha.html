@@ -21,7 +21,11 @@
         
         body { background-color: var(--bg-dark); color: var(--text-main); padding: 30px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
+        .btn-voltar { text-decoration: none; color: var(--text-muted); font-size: 1.2rem; font-weight: bold; transition: 0.2s; background: #222; padding: 10px 20px; border-radius: 10px; }
+        .btn-voltar:hover { color: var(--yellow); background: #333; }
+
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid var(--border); padding-bottom: 20px; }
+        .header-left { display: flex; align-items: center; gap: 20px; }
         .header h1 { color: var(--yellow); font-weight: 900; font-size: 2.5rem; display: flex; align-items: center; gap: 15px;}
         .clock { font-size: 1.5rem; color: var(--text-muted); font-weight: bold; }
 
@@ -93,18 +97,16 @@
         ::-webkit-scrollbar { width: 10px; }
         ::-webkit-scrollbar-track { background: var(--bg-dark); }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 5px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--yellow); }
-        
-        .vazio { text-align: center; color: var(--text-muted); font-size: 1.5rem; margin-top: 50px; grid-column: 1 / -1; }
-    </style>
+    </style> <!-- O ERRO ESTAVA AQUI. ESTAVA <style> SEM A BARRA -->
 </head>
 <body>
 
     <div class="header">
-        <h1>
-            👨‍🍳 Boteco do MK - Cozinha
+        <div class="header-left">
+            <a href="/admin.html" class="btn-voltar">⬅ Voltar</a>
+            <h1>👨‍🍳 Cozinha</h1>
             <button id="btn-som" class="btn-som" onclick="toggleSom()">🔇 Som Desativado</button>
-        </h1>
+        </div>
         <div class="clock" id="relogio">00:00:00</div>
     </div>
 
@@ -119,7 +121,7 @@
         let audioCtx = null;
         let pedidosConhecidos = new Set();
 
-        // --- SISTEMA DE SOM (TOGGLE CORRIGIDO) ---
+        // --- SISTEMA DE SOM COM TOGGLE CORRIGIDO ---
         function toggleSom() {
             const btn = document.getElementById("btn-som");
             somAtivo = !somAtivo; // Inverte o estado (Liga/Desliga)
@@ -175,7 +177,7 @@
                 grid.innerHTML = '';
 
                 if (pedidos.length === 0) {
-                    grid.innerHTML = '<div class="vazio">Nenhum pedido na fila no momento. Boas vendas! 🍻</div>';
+                    grid.innerHTML = '<div class="vazio" style="grid-column: 1/-1; text-align: center; margin-top: 50px; color: #666; font-size: 1.5rem;">Nenhum pedido na fila no momento. Boas vendas! 🍻</div>';
                     return;
                 }
 
