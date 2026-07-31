@@ -237,34 +237,3 @@ background: rgba(231, 76, 60, 0.1);
 .btn-cancelar-pedido:active {
 transform: scale(0.98);
 }
-
-/* ========================================================= /
-/ 📱 RESPONSIVIDADE TOTAL PARA DISPOSITIVOS MÓVEIS (TOTEM)  /
-/ ========================================================= /
-@media (max-width: 768px) {
-/ Transforma o layout lado-a-lado em formato lista (cima para baixo) */
-body { flex-direction: column; height: auto; min-height: 100vh; overflow-y: auto; }
-.layout-totem, .main-container { flex-direction: column; height: auto; overflow: visible; }
-
-/* Menu Lateral de Categorias passa para o topo (arrastável) */
-.category-list, #category-list { 
-    display: flex; flex-direction: row; overflow-x: auto; white-space: nowrap; 
-    padding: 15px; border-right: none; border-bottom: 2px solid var(--border);
-    background: var(--surface);
-}
-.cat-link { flex: 0 0 auto; margin-right: 10px; }
-
-/* Grid do iFood: 1 Coluna no telemóvel */
-.grid-ifood { grid-template-columns: 1fr; gap: 15px; }
-.card-ifood { padding: 15px; }
-
-/* Carrinho de Compras vai para o fundo da página */
-aside, .cart-sidebar { 
-    width: 100%; min-width: 100%; border-left: none; 
-    border-top: 3px solid var(--green); height: auto; min-height: 50vh;
-}
-
-/* Telas Grandes e Modais ocupam o ecrã todo */
-.splash-screen h1 { font-size: 2.5rem; text-align: center; }
-.modal-content { width: 95%; max-width: 95%; padding: 20px; margin: 10px; }
-#lista-extras { grid-template-columns: 1fr; gap: 10px; }
