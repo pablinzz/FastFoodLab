@@ -18,15 +18,21 @@
         
         .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; width: 100%; max-width: 1000px; }
         
+        /* Transformamos os cartões em blocos clicáveis absolutos */
         .hub-card {
             background: var(--surface); border: 2px solid var(--border); border-radius: 20px;
-            padding: 40px 30px; text-align: center; text-decoration: none; color: white;
+            padding: 40px 30px; text-align: center; color: white;
             transition: all 0.3s; cursor: pointer; display: flex; flex-direction: column; align-items: center;
+            font-family: inherit; width: 100%; box-sizing: border-box;
         }
         .hub-card:hover { transform: translateY(-10px); border-color: var(--yellow); box-shadow: 0 10px 30px rgba(241, 196, 15, 0.1); }
-        .hub-card .icon { font-size: 4rem; margin-bottom: 20px; }
-        .hub-card h2 { font-size: 1.8rem; margin-bottom: 10px; color: var(--green); }
-        .hub-card p { color: #aaa; font-size: 1.1rem; line-height: 1.5; }
+        
+        /* Bloqueamos o clique nos textos internos para o clique ir todo para o cartão */
+        .hub-card .icon { font-size: 4rem; margin-bottom: 20px; pointer-events: none; }
+        .hub-card h2 { font-size: 1.8rem; margin-bottom: 10px; color: var(--green); pointer-events: none; }
+        .hub-card p { color: #aaa; font-size: 1.1rem; line-height: 1.5; pointer-events: none; margin: 0; }
+        
+        .versao { margin-top: auto; padding-top: 50px; color: #444; font-weight: bold; letter-spacing: 2px; }
     </style>
 </head>
 <body>
@@ -37,26 +43,32 @@
     </div>
 
     <div class="hub-grid">
-        <a href="produtos.html" class="hub-card">
+        <!-- O Javascript "window.location.assign" força o redirecionamento -->
+        <button class="hub-card" onclick="window.location.assign('produtos.html')">
             <span class="icon">🍔</span>
             <h2>Cardápio</h2>
             <p>Gerir produtos, categorias, preços e ingredientes extras.</p>
-        </a>
-        <a href="estoque.html" class="hub-card">
+        </button>
+        
+        <button class="hub-card" onclick="window.location.assign('estoque.html')">
             <span class="icon">📦</span>
             <h2>Estoque</h2>
             <p>Controle as quantidades gerais e do balcão diário.</p>
-        </a>
-        <a href="cozinha.html" class="hub-card">
+        </button>
+        
+        <button class="hub-card" onclick="window.location.assign('cozinha.html')">
             <span class="icon">👨‍🍳</span>
             <h2>Ecrã da Cozinha</h2>
             <p>Painel (KDS) para acompanhamento dos pedidos em tempo real.</p>
-        </a>
-        <a href="index.html" class="hub-card">
+        </button>
+        
+        <button class="hub-card" onclick="window.location.assign('index.html')">
             <span class="icon">📱</span>
             <h2>Totem</h2>
             <p>Abrir a interface de autoatendimento para os clientes.</p>
-        </a>
+        </button>
     </div>
+
+    <div class="versao">BOTECO DO MK - V2.0</div>
 </body>
 </html>
