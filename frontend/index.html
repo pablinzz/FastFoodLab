@@ -10,15 +10,8 @@
 </head>
 <body>
 
-<!-- OVERLAYS PARA AS ABAS RETRÁTEIS (SÓ MOBILE) -->
-<div class="drawer-overlay" id="overlay-categorias" onclick="toggleCategorias()"></div>
-<div class="drawer-overlay" id="overlay-carrinho" onclick="toggleCarrinho()"></div>
-
 <!-- TOPO FIXO -->
 <header class="topbar">
-    <!-- Botão de categorias exclusivo do Mobile -->
-    <button class="btn-menu-mobile" onclick="toggleCategorias()">☰ Menu</button>
-    
     <div class="brand-area">
         <h1 style="color: var(--yellow); font-weight: 800; font-size: 1.8rem; margin-right: 20px;">🍻 Boteco do MK</h1>
     </div>
@@ -30,8 +23,6 @@
 <div class="app-container">
     <!-- MENU ESQUERDO (CATEGORIAS) -->
     <nav class="category-nav">
-        <!-- Botão fechar exclusivo mobile -->
-        <button class="btn-fechar-drawer" onclick="toggleCategorias()">✖ Fechar Menu</button>
         <div id="category-list"></div>
     </nav>
 
@@ -40,9 +31,6 @@
 
     <!-- ÁREA DIREITA (CARRINHO) -->
     <aside class="cart-sidebar">
-        <!-- Botão fechar exclusivo mobile -->
-        <button class="btn-fechar-drawer" onclick="toggleCarrinho()" style="border-radius: 0;">✖ Fechar Carrinho</button>
-        
         <div class="carrinho-header">
             <h2>🛒 Seu Pedido</h2>
         </div>
@@ -57,15 +45,11 @@
                 <span class="valor-total">R$ <span id="total">0.00</span></span>
             </div>
             <button class="btn-finalizar" onclick="abrirModalPagamento()">FINALIZAR PEDIDO</button>
+            <!-- NOVO BOTÃO DE CANCELAR -->
             <button class="btn-cancelar-pedido" onclick="cancelarPedidoTotem()">Cancelar Pedido</button>
         </div>
     </aside>
 </div>
-
-<!-- BOTÃO FLUTUANTE DO CARRINHO (SÓ MOBILE) -->
-<button class="fab-carrinho" id="fab-carrinho" onclick="toggleCarrinho()">
-    🛒 Ver Carrinho (<span id="qtd-flutuante">0</span>)
-</button>
 
 <!-- MODAL DE INGREDIENTES (PERSONALIZAÇÃO) -->
 <div id="modal-personalizar" class="modal-overlay" style="display: none;">
@@ -73,7 +57,7 @@
         <button class="btn-fechar-canto" onclick="fecharModalPersonalizar()">X</button>
         <img id="img-produto-modal" src="" style="width: 100%; height: 200px; object-fit: cover; border-radius: 16px 16px 0 0; display: none;">
         
-        <div class="modal-body-padding" style="padding: 25px;">
+        <div style="padding: 25px;">
             <h2 id="nome-produto-modal" style="color: var(--yellow); font-size: 2rem;">Nome</h2>
             <p id="desc-produto-modal" style="color: #aaa; margin-bottom: 20px;">Delicioso e preparado na hora.</p>
             
@@ -87,7 +71,7 @@
             <button class="btn-adicionar-modal" style="margin-top: 20px; width: 100%;" onclick="confirmarPersonalizacao()">Adicionar ao Carrinho</button>
         </div>
 
-        <!-- TELA DE SUCESSO (VISTO VERDE GIGANTE) -->
+        <!-- 🚀 NOVO: TELA DE SUCESSO (VISTO VERDE GIGANTE) -->
         <div id="modal-sucesso" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 20, 20, 0.95); border-radius: 16px; z-index: 10; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(4px);">
             <div style="font-size: 6rem; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);">✅</div>
             <h2 style="color: var(--green); margin-top: 15px; font-size: 2rem; animation: fadeIn 0.5s ease-in;">Adicionado!</h2>
@@ -143,7 +127,7 @@
         <input type="text" id="nome-cliente" placeholder="Digite o seu nome" autocomplete="off" style="width: 100%; padding: 18px; font-size: 1.6rem; border-radius: 12px; border: 2px solid var(--border); background: #111; color: white; margin-bottom: 30px; text-align: center; outline: none;">
         
         <h2 style="color: white; font-size: 1.8rem; margin-bottom: 20px;">Onde vai comer?</h2>
-        <div class="botoes-consumo" style="display: flex; gap: 20px; justify-content: center;">
+        <div style="display: flex; gap: 20px; justify-content: center;">
             <button class="btn-pagamento" style="flex: 1; padding: 25px;" onclick="confirmarIdentificacao('AQUI')">
                 <span style="font-size: 3rem; margin-bottom: 10px; display: block;">🍽️</span>
                 <strong>Para Comer Aqui</strong>
