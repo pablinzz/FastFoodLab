@@ -32,6 +32,15 @@
         .hub-card p { color: #aaa; font-size: 1.1rem; line-height: 1.5; margin: 0; }
         
         .versao { margin-top: auto; padding-top: 50px; color: #444; font-weight: bold; letter-spacing: 2px; }
+
+        /* 📱 RESPONSIVIDADE MOBILE */
+        @media (max-width: 768px) {
+            body { padding: 20px 15px; }
+            .header h1 { font-size: 2rem; }
+            .hub-grid { grid-template-columns: 1fr; gap: 15px; }
+            .hub-card { padding: 25px 20px; }
+            .hub-card .icon { font-size: 3rem; }
+        }
     </style>
 </head>
 <body>
@@ -42,25 +51,25 @@
 
     <div class="hub-grid">
         <!-- Links absolutos com barra (/) para forçar a raiz do site -->
-        <a href="/produtos" class="hub-card">
+        <a href="/produtos.html" class="hub-card">
             <span class="icon">🍔</span>
             <h2>Cardápio</h2>
             <p>Gerir produtos, categorias, preços e ingredientes extras.</p>
         </a>
         
-        <a href="/estoque" class="hub-card">
+        <a href="/estoque.html" class="hub-card">
             <span class="icon">📦</span>
             <h2>Estoque</h2>
             <p>Controle as quantidades gerais e do balcão diário.</p>
         </a>
         
-        <a href="/cozinha" class="hub-card">
+        <a href="/cozinha.html" class="hub-card">
             <span class="icon">👨‍🍳</span>
             <h2>Ecrã da Cozinha</h2>
             <p>Painel (KDS) para acompanhamento dos pedidos em tempo real.</p>
         </a>
         
-        <a href="/index" class="hub-card">
+        <a href="/index.html" class="hub-card">
             <span class="icon">📱</span>
             <h2>Totem</h2>
             <p>Abrir a interface de autoatendimento para os clientes.</p>

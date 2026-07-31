@@ -64,6 +64,21 @@
         .btn-cancelar { background: #333; color: white; } .btn-salvar { background: var(--green); color: black; }
 
         ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: var(--bg-dark); } ::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+
+        /* 📱 RESPONSIVIDADE MOBILE */
+        @media (max-width: 768px) {
+            .topbar { flex-direction: column; align-items: stretch; padding: 15px; gap: 15px;}
+            .topbar-left { justify-content: space-between; width: 100%; }
+            .topbar h1 { font-size: 1.5rem; }
+            .calendar-controls { justify-content: center; width: 100%; }
+            .topbar-actions { flex-direction: column; width: 100%; }
+            .topbar-actions button { width: 100%; }
+            .content { padding: 15px; }
+            .estoque-grid { grid-template-columns: 1fr; }
+            .qtd-row { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .stepper { width: 100%; justify-content: space-between; }
+            .stepper input { flex: 1; width: auto; }
+        }
     </style>
 </head>
 <body>

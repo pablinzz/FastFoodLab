@@ -40,12 +40,24 @@
         .btn-editar-produto { background: var(--yellow); color: #000; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-weight: bold; }
         .btn-apagar-produto { background: var(--danger); color: white; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-weight: bold; }
         ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: var(--bg-dark); } ::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+
+        /* 📱 RESPONSIVIDADE MOBILE */
+        @media (max-width: 768px) {
+            body { padding: 15px; }
+            .header { flex-direction: column; text-align: center; gap: 15px; padding-bottom: 15px; }
+            .btn-voltar { margin-right: 0; }
+            .dashboard-container { flex-direction: column; gap: 20px; }
+            .form-section, .list-section { width: 100%; min-width: 100%; padding: 20px; box-sizing: border-box; }
+            .produto-card { flex-direction: column; text-align: center; gap: 10px; }
+            .acoes-card { flex-direction: row; width: 100%; justify-content: center; }
+            .acoes-card button { flex: 1; padding: 12px; font-size: 1.2rem; }
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <!-- Caminho absoluto com a barra inicial (/) -->
-        <a href="/admin" class="btn-voltar">⬅ Voltar ao Painel</a>
+        <a href="/admin.html" class="btn-voltar">⬅ Voltar ao Painel</a>
         <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
         <h1>Gestão de Cardápio</h1>
     </div>
