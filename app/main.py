@@ -3,12 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
 from app.routers import produtos, pedidos, cozinha, admin, webhook, estoque
 
-# Cria as tabelas que faltam automaticamente
+# Cria as tabelas automaticamente
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Boteco do MK API")
 
-# Configuração de CORS para permitir que o Frontend comunique com o Backend
+# Configuração de CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -23,7 +23,7 @@ app.include_router(pedidos.router)
 app.include_router(cozinha.router)
 app.include_router(admin.router)
 app.include_router(webhook.router)
-app.include_router(estoque.router) # Rota nova do inventário!
+app.include_router(estoque.router) # <- Esta linha faz a magia acontecer!
 
 @app.get("/")
 def root():

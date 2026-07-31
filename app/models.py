@@ -10,8 +10,6 @@ class Produto(Base):
     categoria = Column(String, nullable=True, default="Geral")
     ativo = Column(Boolean, default=True)
     imagem_url = Column(String, nullable=True)
-    
-    # Campo JSON para suportar múltiplos ingredientes (ex: [{"nome": "Gelo", "preco": 0}])
     ingredientes_disponiveis = Column(JSON, nullable=True, default=[])
 
 class Pedido(Base):
@@ -19,7 +17,6 @@ class Pedido(Base):
     id = Column(Integer, primary_key=True, index=True)
     total = Column(Float)
     status = Column(String, default="CRIADO")
-    # Identificação do cliente
     nome_cliente = Column(String, nullable=True)
     tipo_consumo = Column(String, nullable=True)
 
@@ -28,7 +25,7 @@ class ItemPedido(Base):
     id = Column(Integer, primary_key=True, index=True)
     pedido_id = Column(Integer)
     produto_id = Column(Integer)
-    quantidade = Column(Integer)
+    quantidade = Column(Integer, default=1)
     preco_unitario = Column(Float)
     observacoes = Column(String, nullable=True)
 
@@ -38,4 +35,4 @@ class Estoque(Base):
     item_nome = Column(String, index=True)
     quantidade_geral = Column(Float, default=0.0)
     quantidade_diaria = Column(Float, default=0.0)
-    unidade = Column(String, default="un") # Pode ser kg, g, Litros, un, etc.
+    unidade = Column(String, default="un")
