@@ -341,31 +341,3 @@ function checarStatusPagamento() {
         }
     });
 }
-
-// Elementos do Carrinho
-const carrinho = document.querySelector('.carrinho-lateral');
-const btnAbrirCarrinho = document.querySelector('#btn-abrir-carrinho');
-const btnFecharCarrinho = document.querySelector('#btn-fechar-carrinho');
-
-// Elementos das Categorias
-const categorias = document.querySelector('.categorias-lateral');
-const btnAbrirCategorias = document.querySelector('#btn-abrir-categorias');
-const btnFecharCategorias = document.querySelector('#btn-fechar-categorias');
-
-// Eventos do Carrinho
-btnAbrirCarrinho.addEventListener('click', () => {
-  carrinho.classList.add('ativo');
-});
-
-btnFecharCarrinho.addEventListener('click', () => {
-  carrinho.classList.remove('ativo');
-});
-
-// Eventos das Categorias
-btnAbrirCategorias.addEventListener('click', () => {
-  categorias.classList.add('ativo');
-});
-
-btnFecharCategorias.addEventListener('click', () => {
-  categorias.classList.remove('ativo');
-});
