@@ -2,169 +2,305 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Boteco do MK - Estoque</title>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <title>Boteco do MK - Estoque Diário</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        :root { --bg-dark: #0a0a0a; --surface: #141414; --border: #2a2a2a; --green: #2ecc71; --yellow: #f1c40f; --danger: #e74c3c; --text-main: #ffffff; --text-muted: #888888; }
-        body { font-family: 'Nunito', sans-serif; background: var(--bg-dark); color: var(--text-main); padding: 40px; margin: 0; }
-        .header { display: flex; align-items: center; margin-bottom: 40px; border-bottom: 2px solid var(--border); padding-bottom: 20px; }
-        .header h1 { color: var(--yellow); font-weight: 800; font-size: 2.5rem; margin: 0; }
-        .btn-voltar { text-decoration: none; color: var(--text-muted); font-size: 1.2rem; font-weight: bold; margin-right: 30px; transition: 0.2s; }
-        .btn-voltar:hover { color: var(--yellow); }
+        :root { --bg-dark: #0a0a0a; --surface: #141414; --border: #2a2a2a; --green: #2ecc71; --yellow: #f1c40f; --danger: #e74c3c; --blue: #3498db; --text-main: #ffffff; --text-muted: #888888; }
+        * { box-sizing: border-box; font-family: 'Nunito', sans-serif; }
+        body { background: var(--bg-dark); color: var(--text-main); margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; }
         
-        .dashboard-container { display: flex; gap: 40px; align-items: flex-start; flex-wrap: wrap;}
-        .form-section { flex: 1; min-width: 300px; background: var(--surface); padding: 30px; border-radius: 20px; border: 1px solid var(--border); }
-        .form-section h2 { color: var(--green); margin-bottom: 20px; font-size: 1.8rem; }
-        label { display: block; margin-top: 15px; font-weight: bold; color: var(--text-muted); }
-        input, select { width: 100%; padding: 12px; margin-top: 5px; border-radius: 10px; border: 1px solid var(--border); background: #1e1e1e; color: white; font-size: 1.1rem; outline: none; box-sizing: border-box;}
+        .topbar { background: var(--surface); border-bottom: 2px solid var(--border); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; z-index: 10; flex-wrap: wrap; gap: 15px;}
+        .topbar-left { display: flex; align-items: center; gap: 20px; }
+        .btn-voltar { text-decoration: none; color: var(--text-muted); font-size: 1.1rem; font-weight: bold; background: #222; padding: 10px 15px; border-radius: 10px; transition: 0.2s;}
+        .btn-voltar:hover { background: #333; color: white; }
+        .topbar h1 { color: var(--yellow); margin: 0; font-size: 1.8rem; font-weight: 900;}
         
-        .btn-salvar { width: 100%; background: var(--green); color: #000; padding: 18px; border: none; border-radius: 12px; font-size: 1.3rem; font-weight: 800; cursor: pointer; margin-top: 30px; }
+        .calendar-controls { display: flex; align-items: center; gap: 10px; background: #000; padding: 5px; border-radius: 12px; border: 1px solid var(--border);}
+        .calendar-controls button { background: #222; border: none; color: white; border-radius: 8px; width: 40px; height: 40px; font-size: 1.2rem; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .calendar-controls button:hover { background: var(--green); color: black; }
+        .calendar-controls input[type="date"] { background: transparent; border: none; color: var(--yellow); font-size: 1.2rem; font-weight: 800; cursor: pointer; outline: none; padding: 0 10px;}
+        ::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+
+        .topbar-actions { display: flex; gap: 15px; flex-wrap: wrap;}
+        .btn-copiar { background: var(--blue); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .btn-novo { background: var(--green); color: #000; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 900; cursor: pointer; transition: 0.2s; }
+        .btn-copiar:hover { background: #2980b9; } .btn-novo:hover { background: #27ae60; }
+
+        .content { flex: 1; overflow-y: auto; padding: 30px; }
+        .data-extenso { font-size: 1.5rem; color: var(--text-muted); margin-bottom: 20px; font-weight: bold; text-transform: capitalize; border-bottom: 1px dashed var(--border); padding-bottom: 10px;}
         
-        .list-section { flex: 1.5; min-width: 300px; background: var(--surface); padding: 30px; border-radius: 20px; border: 1px solid var(--border); }
-        .list-section h2 { color: var(--yellow); margin-bottom: 20px; font-size: 1.8rem; }
+        .estoque-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
+        .estoque-card { background: var(--surface); border: 2px solid var(--border); border-radius: 16px; padding: 20px; position: relative; transition: 0.2s; }
+        .estoque-card.status-pendente { border-color: var(--danger); box-shadow: 0 0 15px rgba(231, 76, 60, 0.1); }
+        .estoque-card.status-pendente::before { content: "Pendente"; position: absolute; top: -10px; left: 20px; background: var(--danger); color: white; font-size: 0.8rem; padding: 3px 10px; border-radius: 10px; font-weight: bold; }
         
-        .estoque-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; max-height: 700px; overflow-y: auto; padding-right: 10px; }
-        
-        .estoque-card { background: #1a1a1a; border: 1px solid var(--border); border-radius: 16px; padding: 20px; position: relative;}
-        .estoque-card h3 { font-size: 1.4rem; margin-bottom: 15px; color: white; display: flex; justify-content: space-between; align-items: center;}
-        .badge-unidade { background: #333; font-size: 0.9rem; padding: 4px 10px; border-radius: 8px; color: var(--yellow); }
-        
-        .qtd-box { background: #0f0f0f; padding: 15px; border-radius: 12px; margin-bottom: 10px; border: 1px dashed #333; display: flex; justify-content: space-between; align-items: center;}
-        .qtd-label { color: var(--text-muted); font-weight: bold; }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+        .card-header h3 { margin: 0; font-size: 1.5rem; color: white; }
+        .badge-unidade { background: #333; font-size: 0.9rem; padding: 4px 10px; border-radius: 8px; color: var(--yellow); margin-left: 10px;}
+        .btn-apagar { background: transparent; color: var(--text-muted); border: none; font-size: 1.2rem; cursor: pointer; transition: 0.2s;}
+        .btn-apagar:hover { color: var(--danger); }
+
+        .qtd-box { background: #0a0a0a; padding: 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #222; }
+        .qtd-row { display: flex; justify-content: space-between; align-items: center; }
+        .qtd-label { color: #aaa; font-weight: bold; font-size: 1.1rem;}
         
         .stepper { display: flex; align-items: center; background: #222; border-radius: 10px; padding: 5px;}
-        .stepper button { background: transparent; border: none; color: white; font-size: 1.5rem; width: 35px; cursor: pointer; transition: 0.2s; }
+        .stepper button { background: transparent; border: none; color: white; font-size: 1.5rem; width: 40px; height: 30px; cursor: pointer; font-weight: bold;}
         .stepper button:hover { color: var(--green); }
-        .stepper span { font-size: 1.2rem; font-weight: bold; width: 50px; text-align: center; }
+        .stepper input { background: transparent; border: none; color: white; font-size: 1.2rem; font-weight: 900; width: 60px; text-align: center; outline: none; }
 
-        .btn-apagar-item { position: absolute; top: -10px; right: -10px; background: var(--danger); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-weight: bold; display: none; }
-        .estoque-card:hover .btn-apagar-item { display: block; }
-        
+        .consumo-badge { margin-top: 10px; font-size: 0.9rem; font-weight: bold; padding: 5px 10px; border-radius: 6px; display: inline-block; background: #222; color: #aaa;}
+        .consumo-badge.gasto { color: var(--danger); background: rgba(231, 76, 60, 0.1); }
+        .consumo-badge.reposto { color: var(--green); background: rgba(46, 204, 113, 0.1); }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(5px);}
+        .modal-content { background: var(--surface); padding: 30px; border-radius: 20px; width: 400px; max-width: 90%; border: 1px solid var(--border); }
+        .modal-content h2 { color: var(--green); margin-top: 0; }
+        .modal-content label { display: block; margin-top: 15px; font-weight: bold; color: #aaa; }
+        .modal-content input, .modal-content select { width: 100%; padding: 12px; margin-top: 5px; border-radius: 10px; border: 1px solid var(--border); background: #111; color: white; font-size: 1.1rem; outline: none;}
+        .modal-buttons { display: flex; gap: 10px; margin-top: 25px; }
+        .modal-buttons button { flex: 1; padding: 15px; border-radius: 10px; font-weight: bold; font-size: 1.1rem; cursor: pointer; border: none;}
+        .btn-cancelar { background: #333; color: white; } .btn-salvar { background: var(--green); color: black; }
+
         ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: var(--bg-dark); } ::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <!-- Caminho absoluto com a barra inicial (/) -->
-        <a href="/admin" class="btn-voltar">⬅ Voltar ao Painel</a>
-        <h1>Controle de Estoque</h1>
-    </div>
 
-    <div class="dashboard-container">
-        <div class="form-section">
-            <h2>➕ Cadastrar Material</h2>
-            <form id="estoque-form">
-                <label>Nome do Ingrediente/Item:</label>
-                <input type="text" id="item_nome" required placeholder="Ex: Carne de Hambúrguer">
-
-                <label>Unidade de Medida:</label>
-                <select id="unidade">
-                    <option value="Unidades">Unidades (un)</option>
-                    <option value="Kg">Quilogramas (Kg)</option>
-                    <option value="Gramas">Gramas (g)</option>
-                    <option value="Litros">Litros (L)</option>
-                    <option value="Caixas">Caixas</option>
-                </select>
-
-                <div style="display: flex; gap: 15px;">
-                    <div style="flex: 1;">
-                        <label>Estoque Geral (Fundo):</label>
-                        <input type="number" id="qtd_geral" step="0.1" required value="0">
-                    </div>
-                    <div style="flex: 1;">
-                        <label>Estoque Diário (Balcão):</label>
-                        <input type="number" id="qtd_diaria" step="0.1" required value="0">
-                    </div>
-                </div>
-
-                <button type="submit" class="btn-salvar" id="btn-salvar">REGISTAR ESTOQUE</button>
-            </form>
+    <div class="topbar">
+        <div class="topbar-left">
+            <a href="/admin" class="btn-voltar">⬅ Voltar</a>
+            <h1>Gestão Diária</h1>
+        </div>
+        
+        <div class="calendar-controls">
+            <button onclick="mudarDia(-1)" title="Dia Anterior">◀</button>
+            <input type="date" id="data-input" onchange="selecionarData()">
+            <button onclick="mudarDia(1)" title="Próximo Dia">▶</button>
         </div>
 
-        <div class="list-section">
-            <h2>📦 Materiais em Estoque</h2>
-            <div id="estoque-grid" class="estoque-grid">
-                <p style="color: #666;">Carregando inventário...</p>
-            </div>
+        <div class="topbar-actions">
+            <button class="btn-copiar" onclick="copiarDeOntem()">🔄 Copiar de Ontem</button>
+            <button class="btn-novo" onclick="abrirModal()">➕ Novo Insumo</button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div id="data-extenso" class="data-extenso">Carregando data...</div>
+        <div id="estoque-grid" class="estoque-grid">
+            <p style="color: #666; font-size: 1.2rem;">Carregando inventário...</p>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-novo">
+        <div class="modal-content">
+            <h2>Cadastrar Insumo</h2>
+            <form id="form-novo" onsubmit="salvarNovoItem(event)">
+                <label>Nome do Item:</label>
+                <input type="text" id="item_nome" required placeholder="Ex: Queijo Cheddar">
+                <label>Unidade de Medida:</label>
+                <select id="unidade">
+                    <option value="Unidades (un)">Unidades (un)</option>
+                    <option value="Kg">Quilogramas (Kg)</option>
+                    <option value="Gramas (g)">Gramas (g)</option>
+                    <option value="Litros (L)">Litros (L)</option>
+                    <option value="Caixas">Caixas</option>
+                    <option value="Pacotes">Pacotes</option>
+                </select>
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex:1"><label>Armazém Inicial:</label><input type="number" id="qtd_g" step="0.1" value="0"></div>
+                    <div style="flex:1"><label>Balcão Inicial:</label><input type="number" id="qtd_d" step="0.1" value="0"></div>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
+                    <button type="submit" class="btn-salvar">Salvar Insumo</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script>
         const API_URL = "https://fastfoodlab.onrender.com";
+        let dataAtual = "";
+        let timerSave = {}; // Para Auto-Save debounce
 
-        document.getElementById("estoque-form").onsubmit = async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById("btn-salvar"); btn.disabled = true;
+        function initData() {
+            const tzoffset = (new Date()).getTimezoneOffset() * 60000;
+            dataAtual = (new Date(Date.now() - tzoffset)).toISOString().split('T')[0];
+            document.getElementById('data-input').value = dataAtual;
+            atualizarTela();
+        }
 
-            const dados = {
-                item_nome: document.getElementById("item_nome").value,
-                unidade: document.getElementById("unidade").value,
-                quantidade_geral: parseFloat(document.getElementById("qtd_geral").value),
-                quantidade_diaria: parseFloat(document.getElementById("qtd_diaria").value)
-            };
+        function mudarDia(delta) {
+            let obj = new Date(dataAtual);
+            obj.setDate(obj.getDate() + delta);
+            dataAtual = obj.toISOString().split('T')[0];
+            document.getElementById('data-input').value = dataAtual;
+            atualizarTela();
+        }
 
+        function selecionarData() {
+            dataAtual = document.getElementById('data-input').value;
+            atualizarTela();
+        }
+
+        function formatarDataExtenso(dataStr) {
+            const [y, m, d] = dataStr.split('-');
+            const dataObj = new Date(y, m-1, d);
+            const opcoes = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            return dataObj.toLocaleDateString('pt-BR', opcoes);
+        }
+
+        async function atualizarTela() {
+            document.getElementById('data-extenso').innerText = "Inventário de " + formatarDataExtenso(dataAtual);
+            const grid = document.getElementById('estoque-grid');
+            
             try {
-                const res = await fetch(`${API_URL}/estoque/`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(dados) });
-                if (res.ok) { document.getElementById("estoque-form").reset(); document.getElementById("qtd_geral").value = "0"; document.getElementById("qtd_diaria").value = "0"; carregarEstoque(); } 
-                else { alert("Erro ao registar estoque."); }
-            } catch (err) { alert("Erro de conexão."); } finally { btn.disabled = false; }
-        };
-
-        async function carregarEstoque() {
-            const grid = document.getElementById("estoque-grid");
-            try {
-                const response = await fetch(`${API_URL}/estoque/`);
+                const response = await fetch(`${API_URL}/estoque/dia/${dataAtual}`);
                 const itens = await response.json();
+                
                 grid.innerHTML = "";
-                if (itens.length === 0) return grid.innerHTML = "<p style='color: #666; grid-column: 1/-1;'>O seu estoque está vazio.</p>";
+                if (itens.length === 0) {
+                    grid.innerHTML = "<p style='color: #666; font-size: 1.2rem; grid-column: 1/-1'>O estoque está vazio. Clique em 'Novo Insumo' para começar o catálogo.</p>";
+                    return;
+                }
 
                 itens.forEach(item => {
-                    grid.innerHTML += `
-                        <div class="estoque-card">
-                            <button class="btn-apagar-item" onclick="apagarItem(${item.id})">X</button>
-                            <h3>${item.item_nome} <span class="badge-unidade">${item.unidade}</span></h3>
-                            
-                            <div class="qtd-box">
-                                <span class="qtd-label">Armazém / Fundo</span>
-                                <div class="stepper">
-                                    <button onclick="alterarQtd(${item.id}, 'geral', ${item.quantidade_geral}, -1)">-</button>
-                                    <span>${item.quantidade_geral}</span>
-                                    <button onclick="alterarQtd(${item.id}, 'geral', ${item.quantidade_geral}, 1)">+</button>
-                                </div>
-                            </div>
+                    // Lógica visual do consumo
+                    let consumoHtml = "";
+                    let totalConsumo = item.consumo_geral + item.consumo_diario;
+                    if (totalConsumo > 0) {
+                        consumoHtml = `<div class="consumo-badge gasto">📉 Gasto: ${totalConsumo.toFixed(1)} ${item.unidade.split(' ')[0]}</div>`;
+                    } else if (totalConsumo < 0) {
+                        consumoHtml = `<div class="consumo-badge reposto">📈 Reposto: ${Math.abs(totalConsumo).toFixed(1)} ${item.unidade.split(' ')[0]}</div>`;
+                    } else {
+                        consumoHtml = `<div class="consumo-badge">Igual a ontem</div>`;
+                    }
 
-                            <div class="qtd-box" style="border-color: var(--green);">
-                                <span class="qtd-label" style="color: white;">Frente / Balcão</span>
+                    const card = document.createElement('div');
+                    card.className = `estoque-card status-${item.status.toLowerCase()}`;
+                    card.innerHTML = `
+                        <div class="card-header">
+                            <h3>${item.item_nome} <span class="badge-unidade">${item.unidade}</span></h3>
+                            <button class="btn-apagar" onclick="apagarItem(${item.id}, '${item.item_nome}')" title="Apagar Insumo">🗑️</button>
+                        </div>
+                        
+                        <div class="qtd-box">
+                            <div class="qtd-row">
+                                <span class="qtd-label">Armazém (Geral)</span>
                                 <div class="stepper">
-                                    <button onclick="alterarQtd(${item.id}, 'diaria', ${item.quantidade_diaria}, -1)">-</button>
-                                    <span style="color: var(--green);">${item.quantidade_diaria}</span>
-                                    <button onclick="alterarQtd(${item.id}, 'diaria', ${item.quantidade_diaria}, 1)">+</button>
+                                    <button onclick="alterarQtd(${item.id}, 'geral', -1)">-</button>
+                                    <input type="number" id="qtd_g_${item.id}" value="${item.quantidade_geral}" step="0.1" onchange="autoSave(${item.id})">
+                                    <button onclick="alterarQtd(${item.id}, 'geral', 1)">+</button>
                                 </div>
                             </div>
                         </div>
+
+                        <div class="qtd-box">
+                            <div class="qtd-row">
+                                <span class="qtd-label">Balcão (Diário)</span>
+                                <div class="stepper">
+                                    <button onclick="alterarQtd(${item.id}, 'diaria', -1)">-</button>
+                                    <input type="number" id="qtd_d_${item.id}" value="${item.quantidade_diaria}" step="0.1" onchange="autoSave(${item.id})">
+                                    <button onclick="alterarQtd(${item.id}, 'diaria', 1)">+</button>
+                                </div>
+                            </div>
+                        </div>
+                        ${consumoHtml}
                     `;
+                    grid.appendChild(card);
                 });
-            } catch (err) { grid.innerHTML = "<p style='color: red;'>Erro ao carregar estoque.</p>"; }
+            } catch (err) {
+                grid.innerHTML = "<p style='color: red;'>Erro ao carregar os dados.</p>";
+            }
         }
 
-        async function alterarQtd(id, tipo, qtdAtual, delta) {
-            let novaQtd = qtdAtual + delta;
-            if (novaQtd < 0) novaQtd = 0; // Não permite estoque negativo
+        function alterarQtd(id, campo, delta) {
+            const input = document.getElementById(campo === 'geral' ? `qtd_g_${id}` : `qtd_d_${id}`);
+            let val = parseFloat(input.value) + delta;
+            if (val < 0) val = 0;
+            
+            // Format to 1 decimal place to avoid JS floating point math bugs (e.g. 1.000000001)
+            input.value = parseFloat(val.toFixed(1)); 
+            
+            autoSave(id);
+        }
 
-            const payload = tipo === 'geral' ? { quantidade_geral: novaQtd } : { quantidade_diaria: novaQtd };
+        async function autoSave(id) {
+            const q_geral = parseFloat(document.getElementById(`qtd_g_${id}`).value) || 0;
+            const q_diaria = parseFloat(document.getElementById(`qtd_d_${id}`).value) || 0;
+
+            // Debounce para não travar a API se o utilizador clicar rápido demais
+            clearTimeout(timerSave[id]);
+            timerSave[id] = setTimeout(async () => {
+                try {
+                    await fetch(`${API_URL}/estoque/dia/${dataAtual}/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ quantidade_geral: q_geral, quantidade_diaria: q_diaria })
+                    });
+                    
+                    // Altera a cor do cartão de vermelho(pendente) para normal silenciosamente
+                    const card = document.getElementById(`qtd_g_${id}`).closest('.estoque-card');
+                    card.classList.remove('status-pendente');
+                    card.classList.add('status-registrado');
+                    
+                } catch (error) {
+                    console.error("Erro ao salvar", error);
+                }
+            }, 500);
+        }
+
+        async function copiarDeOntem() {
+            if(!confirm("Atenção! Isto vai copiar as quantidades de ontem para hoje. Confirmar?")) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/estoque/copiar-ontem/${dataAtual}`, { method: 'POST' });
+                if (response.ok) {
+                    atualizarTela();
+                } else {
+                    const data = await response.json();
+                    alert(data.detail || "Erro ao copiar.");
+                }
+            } catch (err) {
+                alert("Erro de conexão.");
+            }
+        }
+
+        function abrirModal() { document.getElementById('modal-novo').style.display = 'flex'; }
+        function fecharModal() { document.getElementById('modal-novo').style.display = 'none'; document.getElementById('form-novo').reset(); }
+
+        async function salvarNovoItem(e) {
+            e.preventDefault();
+            const dados = {
+                item_nome: document.getElementById('item_nome').value,
+                unidade: document.getElementById('unidade').value,
+                quantidade_geral: parseFloat(document.getElementById('qtd_g').value) || 0,
+                quantidade_diaria: parseFloat(document.getElementById('qtd_d').value) || 0
+            };
 
             try {
-                await fetch(`${API_URL}/estoque/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-                carregarEstoque(); // Atualiza visualmente
-            } catch (err) { alert("Falha ao atualizar."); }
+                await fetch(`${API_URL}/estoque/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dados)
+                });
+                fecharModal();
+                atualizarTela(); // Recarrega hoje já com o item
+            } catch (err) { alert("Erro ao criar item."); }
         }
 
-        async function apagarItem(id) {
-            if(!confirm("Tem a certeza que quer remover este item do estoque?")) return;
-            try { await fetch(`${API_URL}/estoque/${id}`, { method: "DELETE" }); carregarEstoque(); } catch (err) {}
+        async function apagarItem(id, nome) {
+            if(!confirm(`Tem certeza que quer apagar "${nome}" permanentemente de TODOS os dias do histórico?`)) return;
+            try {
+                await fetch(`${API_URL}/estoque/${id}`, { method: 'DELETE' });
+                atualizarTela();
+            } catch(e) { alert("Erro ao apagar"); }
         }
 
-        window.onload = carregarEstoque;
+        // Init
+        window.onload = initData;
     </script>
 </body>
 </html>

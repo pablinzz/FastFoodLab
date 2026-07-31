@@ -36,3 +36,12 @@ class Estoque(Base):
     quantidade_geral = Column(Float, default=0.0)
     quantidade_diaria = Column(Float, default=0.0)
     unidade = Column(String, default="un")
+
+# ADICIONE ISTO NO FINAL DO ARQUIVO:
+class EstoqueHistorico(Base):
+    __tablename__ = "estoque_historico"
+    id = Column(Integer, primary_key=True, index=True)
+    data = Column(String, index=True) # Guarda o dia (YYYY-MM-DD)
+    item_id = Column(Integer)
+    quantidade_geral = Column(Float, default=0.0)
+    quantidade_diaria = Column(Float, default=0.0)
