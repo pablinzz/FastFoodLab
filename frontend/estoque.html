@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <title>Boteco do MK - Estoque Diário</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- MÁXIMA RESPONSIVIDADE E SEM ZOOM DE DEDO -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root { --bg-dark: #0a0a0a; --surface: #141414; --border: #2a2a2a; --green: #2ecc71; --yellow: #f1c40f; --danger: #e74c3c; --blue: #3498db; --text-main: #ffffff; --text-muted: #888888; }
         * { box-sizing: border-box; font-family: 'Nunito', sans-serif; }
-        body { background: var(--bg-dark); color: var(--text-main); margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; }
+        body { background: var(--bg-dark); color: var(--text-main); margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; overflow-x: hidden; }
         
         .topbar { background: var(--surface); border-bottom: 2px solid var(--border); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; z-index: 10; flex-wrap: wrap; gap: 15px;}
         .topbar-left { display: flex; align-items: center; gap: 20px; }
@@ -65,16 +66,16 @@
 
         ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: var(--bg-dark); } ::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
 
-        /* 📱 RESPONSIVIDADE MOBILE */
+        /* 📱 RESPONSIVIDADE MOBILE ABSOLUTA */
         @media (max-width: 768px) {
             .topbar { flex-direction: column; align-items: stretch; padding: 15px; gap: 15px;}
             .topbar-left { justify-content: space-between; width: 100%; }
             .topbar h1 { font-size: 1.5rem; }
             .calendar-controls { justify-content: center; width: 100%; }
             .topbar-actions { flex-direction: column; width: 100%; }
-            .topbar-actions button { width: 100%; }
-            .content { padding: 15px; }
-            .estoque-grid { grid-template-columns: 1fr; }
+            .topbar-actions button { width: 100%; padding: 15px; font-size: 1.1rem;}
+            .content { padding: 15px; width: 100%;}
+            .estoque-grid { grid-template-columns: 1fr; width: 100%;}
             .qtd-row { flex-direction: column; align-items: flex-start; gap: 10px; }
             .stepper { width: 100%; justify-content: space-between; }
             .stepper input { flex: 1; width: auto; }
@@ -82,7 +83,6 @@
     </style>
 </head>
 <body>
-
     <div class="topbar">
         <div class="topbar-left">
             <a href="/admin" class="btn-voltar">⬅ Voltar</a>
@@ -96,7 +96,7 @@
         </div>
 
         <div class="topbar-actions">
-            <button class="btn-copiar" onclick="copiarDeOntem()">🔄 Copiar de Ontem</button>
+            <button class="btn-copiar" onclick="copiarDeOntem()">🔄 Copiar Final de Ontem</button>
             <button class="btn-novo" onclick="abrirModal()">➕ Novo Insumo</button>
         </div>
     </div>
@@ -125,7 +125,7 @@
                 </select>
                 <div style="display: flex; gap: 10px;">
                     <div style="flex:1"><label>Armazém Inicial:</label><input type="number" id="qtd_g" step="0.1" value="0"></div>
-                    <div style="flex:1"><label>Balcão Inicial:</label><input type="number" id="qtd_d" step="0.1" value="0"></div>
+                    <div style="flex:1"><label>Armazém Final:</label><input type="number" id="qtd_d" step="0.1" value="0"></div>
                 </div>
                 <div class="modal-buttons">
                     <button type="button" class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
@@ -138,7 +138,7 @@
     <script>
         const API_URL = "https://fastfoodlab.onrender.com";
         let dataAtual = "";
-        let timerSave = {}; // Para Auto-Save debounce
+        let timerSave = {};
 
         function initData() {
             const tzoffset = (new Date()).getTimezoneOffset() * 60000;
@@ -182,15 +182,15 @@
                 }
 
                 itens.forEach(item => {
-                    // Lógica visual do consumo
                     let consumoHtml = "";
-                    let totalConsumo = item.consumo_geral + item.consumo_diario;
+                    let totalConsumo = item.consumo_diario; // Agora já vem calculado como Inicial - Final
+                    
                     if (totalConsumo > 0) {
-                        consumoHtml = `<div class="consumo-badge gasto">📉 Gasto: ${totalConsumo.toFixed(1)} ${item.unidade.split(' ')[0]}</div>`;
+                        consumoHtml = `<div class="consumo-badge gasto">📉 Consumido: ${totalConsumo.toFixed(1)} ${item.unidade.split(' ')[0]}</div>`;
                     } else if (totalConsumo < 0) {
-                        consumoHtml = `<div class="consumo-badge reposto">📈 Reposto: ${Math.abs(totalConsumo).toFixed(1)} ${item.unidade.split(' ')[0]}</div>`;
+                        consumoHtml = `<div class="consumo-badge reposto">📈 Sobrou a mais: ${Math.abs(totalConsumo).toFixed(1)} ${item.unidade.split(' ')[0]}</div>`;
                     } else {
-                        consumoHtml = `<div class="consumo-badge">Igual a ontem</div>`;
+                        consumoHtml = `<div class="consumo-badge">Nenhum consumo registrado</div>`;
                     }
 
                     const card = document.createElement('div');
@@ -203,7 +203,7 @@
                         
                         <div class="qtd-box">
                             <div class="qtd-row">
-                                <span class="qtd-label">Armazém (Geral)</span>
+                                <span class="qtd-label">Armazém Inicial (Início do Dia)</span>
                                 <div class="stepper">
                                     <button onclick="alterarQtd(${item.id}, 'geral', -1)">-</button>
                                     <input type="number" id="qtd_g_${item.id}" value="${item.quantidade_geral}" step="0.1" onchange="autoSave(${item.id})">
@@ -212,9 +212,9 @@
                             </div>
                         </div>
 
-                        <div class="qtd-box">
+                        <div class="qtd-box" style="border-color: #333;">
                             <div class="qtd-row">
-                                <span class="qtd-label">Balcão (Diário)</span>
+                                <span class="qtd-label" style="color:#ddd">Armazém Final (Fim do Dia)</span>
                                 <div class="stepper">
                                     <button onclick="alterarQtd(${item.id}, 'diaria', -1)">-</button>
                                     <input type="number" id="qtd_d_${item.id}" value="${item.quantidade_diaria}" step="0.1" onchange="autoSave(${item.id})">
@@ -235,10 +235,7 @@
             const input = document.getElementById(campo === 'geral' ? `qtd_g_${id}` : `qtd_d_${id}`);
             let val = parseFloat(input.value) + delta;
             if (val < 0) val = 0;
-            
-            // Format to 1 decimal place to avoid JS floating point math bugs (e.g. 1.000000001)
             input.value = parseFloat(val.toFixed(1)); 
-            
             autoSave(id);
         }
 
@@ -246,7 +243,6 @@
             const q_geral = parseFloat(document.getElementById(`qtd_g_${id}`).value) || 0;
             const q_diaria = parseFloat(document.getElementById(`qtd_d_${id}`).value) || 0;
 
-            // Debounce para não travar a API se o utilizador clicar rápido demais
             clearTimeout(timerSave[id]);
             timerSave[id] = setTimeout(async () => {
                 try {
@@ -256,19 +252,13 @@
                         body: JSON.stringify({ quantidade_geral: q_geral, quantidade_diaria: q_diaria })
                     });
                     
-                    // Altera a cor do cartão de vermelho(pendente) para normal silenciosamente
-                    const card = document.getElementById(`qtd_g_${id}`).closest('.estoque-card');
-                    card.classList.remove('status-pendente');
-                    card.classList.add('status-registrado');
-                    
-                } catch (error) {
-                    console.error("Erro ao salvar", error);
-                }
+                    atualizarTela(); // Recarrega para atualizar a barra de consumo
+                } catch (error) { console.error("Erro ao salvar", error); }
             }, 500);
         }
 
         async function copiarDeOntem() {
-            if(!confirm("Atenção! Isto vai copiar as quantidades de ontem para hoje. Confirmar?")) return;
+            if(!confirm("Atenção: O 'Armazém Final' da noite passada vai tornar-se o 'Armazém Inicial' de hoje. Confirmar?")) return;
             
             try {
                 const response = await fetch(`${API_URL}/estoque/copiar-ontem/${dataAtual}`, { method: 'POST' });
@@ -278,9 +268,7 @@
                     const data = await response.json();
                     alert(data.detail || "Erro ao copiar.");
                 }
-            } catch (err) {
-                alert("Erro de conexão.");
-            }
+            } catch (err) { alert("Erro de conexão."); }
         }
 
         function abrirModal() { document.getElementById('modal-novo').style.display = 'flex'; }
@@ -302,19 +290,18 @@
                     body: JSON.stringify(dados)
                 });
                 fecharModal();
-                atualizarTela(); // Recarrega hoje já com o item
+                atualizarTela(); 
             } catch (err) { alert("Erro ao criar item."); }
         }
 
         async function apagarItem(id, nome) {
-            if(!confirm(`Tem certeza que quer apagar "${nome}" permanentemente de TODOS os dias do histórico?`)) return;
+            if(!confirm(`Tem certeza que quer apagar "${nome}" permanentemente?`)) return;
             try {
                 await fetch(`${API_URL}/estoque/${id}`, { method: 'DELETE' });
                 atualizarTela();
             } catch(e) { alert("Erro ao apagar"); }
         }
 
-        // Init
         window.onload = initData;
     </script>
 </body>

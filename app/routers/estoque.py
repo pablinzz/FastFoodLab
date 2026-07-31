@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from typing import Optional
 from app.database import get_db
 from app.models import Estoque, EstoqueHistorico
 from datetime import datetime, timedelta
@@ -25,7 +24,6 @@ def adicionar_item_estoque(item: EstoqueCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(novo_item)
     
-    # Salva o historico de hoje automaticamente
     hoje = datetime.now().strftime("%Y-%m-%d")
     hist = EstoqueHistorico(data=hoje, item_id=novo_item.id, quantidade_geral=item.quantidade_geral, quantidade_diaria=item.quantidade_diaria)
     db.add(hist)
@@ -36,29 +34,23 @@ def adicionar_item_estoque(item: EstoqueCreate, db: Session = Depends(get_db)):
 def listar_estoque_dia(data_str: str, db: Session = Depends(get_db)):
     itens = db.query(Estoque).order_by(Estoque.item_nome.asc()).all()
     
-    # Calcula qual foi o dia anterior para comparar consumos
-    data_obj = datetime.strptime(data_str, "%Y-%m-%d")
-    ontem_str = (data_obj - timedelta(days=1)).strftime("%Y-%m-%d")
-
     resultado = []
     for item in itens:
         reg_hoje = db.query(EstoqueHistorico).filter(EstoqueHistorico.data == data_str, EstoqueHistorico.item_id == item.id).first()
-        reg_ontem = db.query(EstoqueHistorico).filter(EstoqueHistorico.data == ontem_str, EstoqueHistorico.item_id == item.id).first()
         
-        q_geral = reg_hoje.quantidade_geral if reg_hoje else 0
-        q_diaria = reg_hoje.quantidade_diaria if reg_hoje else 0
+        q_inicial = reg_hoje.quantidade_geral if reg_hoje else 0.0
+        q_final = reg_hoje.quantidade_diaria if reg_hoje else 0.0
 
-        # Se houver registro anterior, calcula a diferença (Consumo)
-        cons_geral = (reg_ontem.quantidade_geral - q_geral) if reg_ontem else 0
-        cons_diario = (reg_ontem.quantidade_diaria - q_diaria) if reg_ontem else 0
+        # MÁGICA: O Consumo é o que havia no Início MENOS o que sobrou no Final do mesmo dia!
+        cons_diario = q_inicial - q_final
 
         resultado.append({
             "id": item.id,
             "item_nome": item.item_nome,
             "unidade": item.unidade,
-            "quantidade_geral": q_geral,
-            "quantidade_diaria": q_diaria,
-            "consumo_geral": round(cons_geral, 2),
+            "quantidade_geral": q_inicial,
+            "quantidade_diaria": q_final,
+            "consumo_geral": 0, 
             "consumo_diario": round(cons_diario, 2),
             "status": "REGISTRADO" if reg_hoje else "PENDENTE"
         })
@@ -66,7 +58,6 @@ def listar_estoque_dia(data_str: str, db: Session = Depends(get_db)):
 
 @router.put("/dia/{data_str}/{item_id}")
 def atualizar_estoque_dia(data_str: str, item_id: int, atualizacao: EstoqueUpdate, db: Session = Depends(get_db)):
-    # Busca se já existe um card deste dia para este produto
     hist = db.query(EstoqueHistorico).filter(EstoqueHistorico.data == data_str, EstoqueHistorico.item_id == item_id).first()
     
     if hist:
@@ -88,21 +79,26 @@ def copiar_estoque_de_ontem(data_str: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Não existem registros no dia anterior para copiar.")
         
     for reg in registros_ontem:
-        # Verifica se já tem algo hoje. Se não tiver, copia de ontem
         existe_hoje = db.query(EstoqueHistorico).filter(EstoqueHistorico.data == data_str, EstoqueHistorico.item_id == reg.item_id).first()
         if not existe_hoje:
-            novo_hist = EstoqueHistorico(data=data_str, item_id=reg.item_id, quantidade_geral=reg.quantidade_geral, quantidade_diaria=reg.quantidade_diaria)
+            # LÓGICA DE OURO: O "Armazém Inicial" de hoje recebe o "Armazém Final" de ontem
+            # E o "Armazém Final" de hoje começa igual, para que o consumo seja 0 até ser atualizado
+            novo_hist = EstoqueHistorico(
+                data=data_str, 
+                item_id=reg.item_id, 
+                quantidade_geral=reg.quantidade_diaria, # Inicial = Final de ontem
+                quantidade_diaria=reg.quantidade_diaria # Final começa = Inicial
+            )
             db.add(novo_hist)
             
     db.commit()
-    return {"mensagem": "Inventário de ontem copiado para hoje."}
+    return {"mensagem": "Final de ontem transformado no Inicial de hoje."}
 
 @router.delete("/{item_id}")
 def deletar_item_estoque(item_id: int, db: Session = Depends(get_db)):
     item = db.query(Estoque).filter(Estoque.id == item_id).first()
     if item:
         db.delete(item)
-        # Apaga o historico desse item tambem
         db.query(EstoqueHistorico).filter(EstoqueHistorico.item_id == item_id).delete()
         db.commit()
     return {"mensagem": "Item apagado de todo o sistema"}
