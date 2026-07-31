@@ -316,25 +316,32 @@ aside.carrinho { width: 380px; background: white; box-shadow: -5px 0 25px rgba(0
 #splash-screen button { padding: 20px 40px; font-size: 1.5rem; border-radius: 15px; border: none; background: #f1c40f; color: white; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.3s; }
 #splash-screen button:hover { background: #d4ac0d; transform: scale(1.05); }
 
-/* STREAMING_CHUNK:Consertando o Carrinho no Mobile... */
-@media (max-width: 850px) {
-.container {
-flex-direction: column !important;
-height: auto !important;
-}
+/* =========================================
+   CORREÇÃO EXCLUSIVA PARA TELEMÓVEIS
+   ========================================= */
+@media (max-width: 900px) {
+    /* Obriga a página e os contentores a empilharem verticalmente */
+    body, html, .container, main, #root {
+        display: flex !important;
+        flex-direction: column !important;
+        height: auto !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+    }
 
-main { 
-    width: 100% !important; 
-    overflow: visible !important; 
-}
+    /* Faz as barras laterais e o carrinho ocuparem 100% da largura e descerem */
+    aside, nav, .sidebar, .carrinho, #carrinho, .menu-lateral {
+        width: 100% !important;
+        height: auto !important;
+        position: relative !important;
+        min-height: auto !important;
+    }
 
-aside.carrinho, .carrinho { 
-    width: 100% !important; 
-    position: relative !important; 
-    height: auto !important;
-    min-height: 50vh;
-    z-index: 1;
-}
-
-
+    /* Ajusta os modais (ex: O 'Como se chama?') para não espremerem */
+    .modal-content, #splash-screen, .popup {
+        width: 95% !important;
+        flex-direction: column !important;
+        height: auto !important;
+        padding: 20px !important;
+    }
 }
